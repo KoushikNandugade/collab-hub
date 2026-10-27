@@ -470,12 +470,17 @@ try {
         );
         browserStage = "live browser chat";
         await ownerPage.setViewportSize({ width: 1280, height: 900 });
-        for (const page of pages) {
-          await page.goto(`${app}/app/messages/${conversation._id}`);
+        for (const [index, page] of pages.entries()) {
+          browserStage =
+            index === 0 ? "owner chat connection" : "member chat connection";
+          await page.goto(
+            `${app}/app/messages?conversation=${conversation._id}`,
+          );
           await expect(
             page.getByText("Live conversation", { exact: true }),
           ).toBeVisible({ timeout: 20000 });
         }
+        browserStage = "live browser message delivery";
         const message = `Browser delivery verification ${nonce}`;
         await memberPage.getByLabel("Message", { exact: true }).fill(message);
         await memberPage
@@ -484,6 +489,7 @@ try {
         await expect(ownerPage.getByText(message, { exact: true })).toBeVisible(
           { timeout: 15000 },
         );
+        browserStage = "browser message persistence after reload";
         await ownerPage.reload();
         await expect(ownerPage.getByText(message, { exact: true })).toBeVisible(
           { timeout: 15000 },
