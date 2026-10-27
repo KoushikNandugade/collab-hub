@@ -21,6 +21,20 @@ The supplied Atlas URI has no database path. The connection helper selects `coll
 
 On Vercel alone, the REST API supports accounts, onboarding, profiles, projects, applications, invitations, saved projects, workspaces, tasks, resources, notifications, and persisted messages. Conversations refresh every five seconds. Vercel functions do not host a persistent Socket.IO server; typing indicators and immediate delivery use the Render service below.
 
+## If `/api/health` returns a Vercel 404
+
+A Vercel 404 means the function was not routed or the expected deployment is not active; it does not establish a MongoDB credential failure. The checked-in function is at repository-root `api/index.js`, not inside `client`.
+
+In the existing Vercel project, check **Settings → Build and Deployment → Root Directory**. Use the repository root (blank or `./`), save, and redeploy the latest `main` commit. The root `vercel.json` supplies the frontend output directory and `/api/*` rewrite. Confirm that the deployment is Ready and that `/api/health` returns JSON. A JSON 503 after that is a separate runtime/configuration failure and should be investigated using the function logs and Atlas connectivity.
+
+## API-key-free Render dashboard launch
+
+[Create the backend from this repository's blueprint](https://render.com/deploy?repo=https://github.com/KoushikNandugade/collab-hub).
+
+This uses your logged-in Render dashboard. No Render API key is needed. Keep the existing Vercel project. Render will ask for the private `MONGODB_URI` and shared `JWT_SECRET`; all other required service settings and the Vercel origin are in `render.yaml`. Never put credentials in the deploy URL or commit them to the repository.
+
+After Render reports Live, test its own service URL with `/api/health`, then connect that URL to Vercel using `REALTIME_URL` as described below. Do not guess a Render hostname before the service exists.
+
 ## Connect live Socket.IO delivery without changing the Vercel link
 
 1. Create the Render service from the checked-in `render.yaml` in the same repository. Use the **same** `MONGODB_URI` and `JWT_SECRET` values as Vercel. `CLIENT_ORIGIN` is already set to the existing Vercel domain in that blueprint.

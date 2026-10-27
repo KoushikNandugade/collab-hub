@@ -6,6 +6,14 @@ Project URL: [collab-hub-phi.vercel.app](https://collab-hub-phi.vercel.app) · R
 
 A full-stack collaboration platform for students, developers, designers, and makers. Discover projects, apply for a role, recruit a team, and build together in a private workspace.
 
+## Start the Render backend without an API key
+
+[Deploy the existing repository on Render](https://render.com/deploy?repo=https://github.com/KoushikNandugade/collab-hub)
+
+Open that link in your logged-in Render account. The checked-in blueprint supplies the build/start commands, health check, free-plan selection, and existing Vercel origin. Enter only your private `MONGODB_URI` and the **same** `JWT_SECRET` already configured on Vercel. After the service is live, save its HTTPS URL as `REALTIME_URL` in the existing Vercel project and redeploy that project. Your frontend domain stays unchanged.
+
+A Render API key is not an application setting and is not needed for this dashboard workflow.
+
 ## What you can do
 
 - Create an account with bcrypt-hashed passwords and JWT sessions in HTTP-only cookies.
