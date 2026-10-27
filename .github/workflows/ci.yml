@@ -23,6 +23,10 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run seed
+      - name: Prepare development watcher environment file
+        # Node 22 watch mode still watches an optional env-file path when absent.
+        # Settings remain injected by the job; this ignored file contains no secrets.
+        run: touch .env
       - name: Browser smoke tests
         run: E2E_START_SERVER=dev npm run test:e2e -- --reporter=list,github
       - name: Browser tests through the Vercel function
