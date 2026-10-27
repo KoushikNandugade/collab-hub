@@ -21,7 +21,11 @@ module.exports = async function handler(req, res) {
           origin:
             process.env.CLIENT_ORIGIN ||
             `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL}`,
-          realtimeUrl: process.env.REALTIME_URL || "",
+          realtimeUrl:
+            process.env.REALTIME_URL ||
+            (process.env.NODE_ENV === "production"
+              ? "https://collab-hub-d51v.onrender.com"
+              : ""),
         });
       })().catch((error) => {
         application = undefined;

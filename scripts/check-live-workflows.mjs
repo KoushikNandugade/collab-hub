@@ -103,12 +103,32 @@ async function step(name, operation) {
   }
 }
 async function socketFor(client) {
-  const access = await request(client, "/realtime");
+  // A connected deployment may still be rolling out while this workflow starts.
+  // Recheck the required live configuration before creating socket connections.
+  let access;
+  for (let attempt = 0; attempt < 12; attempt++) {
+    try {
+      access = await request(client, "/realtime");
+      if (
+        access.mode === "external" &&
+        origin(access.url) === realtime &&
+        typeof access.token === "string"
+      )
+        break;
+    } catch {}
+    if (attempt < 11) await new Promise((resolve) => setTimeout(resolve, 5000));
+  }
   requireCondition(
-    access.mode === "external" &&
-      origin(access.url) === realtime &&
-      typeof access.token === "string",
-    "Expected scoped access to the configured external socket service.",
+    Boolean(access),
+    "The real-time access endpoint was unavailable.",
+  );
+  requireCondition(
+    access.mode === "external",
+    `Expected external socket mode; received ${["polling", "same-origin"].includes(access.mode) ? access.mode : "an unsupported mode"}.`,
+  );
+  requireCondition(
+    origin(access.url) === realtime && typeof access.token === "string",
+    "The socket URL must match the configured Render service and include scoped access.",
   );
   const socket = io(access.url, {
     autoConnect: false,

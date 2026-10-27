@@ -20,16 +20,16 @@ Use the existing `collab-hub` project connected to `KoushikNandugade/collab-hub`
 | Build Command    | `npm run build`                             |
 | Output Directory | `client/dist`                               |
 
-The root `vercel.json` contains the build settings, function configuration, API rewrites, and React Router fallback. If dashboard overrides are enabled, ensure they agree with these values. Do not set Root Directory to `client`: the API function and server workspace are at the repository root.
+The root `vercel.json` contains the build settings, function configuration, API rewrites, and React Router fallback. The Vercel Production function uses the existing Render URL by default when `REALTIME_URL` is absent; local function runs keep polling unless an external URL is configured. If dashboard overrides are enabled, ensure they agree with these values. Do not set Root Directory to `client`: the API function and server workspace are at the repository root.
 
 Add these variables in **Environment Variables**, selecting **Production**:
 
-| Name            | Value                                                              |
-| --------------- | ------------------------------------------------------------------ |
-| `MONGODB_URI`   | Private Atlas connection string; identical to Render               |
-| `JWT_SECRET`    | Private random secret, at least 32 characters; identical to Render |
-| `CLIENT_ORIGIN` | `https://collab-hub-phi.vercel.app`                                |
-| `REALTIME_URL`  | `https://collab-hub-d51v.onrender.com`                             |
+| Name            | Value                                                                            |
+| --------------- | -------------------------------------------------------------------------------- |
+| `MONGODB_URI`   | Private Atlas connection string; identical to Render                             |
+| `JWT_SECRET`    | Private random secret, at least 32 characters; identical to Render               |
+| `CLIENT_ORIGIN` | `https://collab-hub-phi.vercel.app`                                              |
+| `REALTIME_URL`  | Optional override; Production defaults to `https://collab-hub-d51v.onrender.com` |
 
 Vercel supplies `NODE_ENV=production`. Do not expose credentials through `VITE_` variables. Settings saved only for Preview or Development do not configure Production. Enter the value alone, without a `KEY=` prefix.
 

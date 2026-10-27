@@ -72,7 +72,11 @@ test("Vercel entry point reuses connections, protects sessions, and persists a p
       assert.match(response.headers.get("set-cookie"), /HttpOnly/);
       assert.match(response.headers.get("set-cookie"), /Secure/);
       assert.equal((await request("/auth/me")).data.user._id, user._id);
-      assert.equal((await request("/realtime")).data.mode, "polling");
+      const access = (await request("/realtime")).data;
+      assert.equal(access.mode, "external");
+      assert.equal(access.url, "https://collab-hub-d51v.onrender.com");
+      assert.equal(typeof access.token, "string");
+      await assert.rejects(() => authenticateToken(access.token, secret));
     },
   );
   await t.test(

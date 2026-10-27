@@ -98,15 +98,15 @@ Open **http://localhost:5173**. The API runs on **http://localhost:3001**, and V
 
 ### Environment variables
 
-| Variable                                                               | Purpose                                                              |
-| ---------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `MONGODB_URI`                                                          | MongoDB replica-set connection string; required by the API           |
-| `JWT_SECRET`                                                           | Random signing secret of at least 32 characters; required by the API |
-| `CLIENT_ORIGIN`                                                        | Browser origin; `http://localhost:5173` for development              |
-| `PORT`                                                                 | Local API port; defaults to `3001`; Render supplies its own port     |
-| `NODE_ENV`                                                             | `development` locally, `production` when hosted                      |
-| `REALTIME_URL`                                                         | Optional persistent Socket.IO service URL for the Vercel API         |
-| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Optional image-upload configuration                                  |
+| Variable                                                               | Purpose                                                                        |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `MONGODB_URI`                                                          | MongoDB replica-set connection string; required by the API                     |
+| `JWT_SECRET`                                                           | Random signing secret of at least 32 characters; required by the API           |
+| `CLIENT_ORIGIN`                                                        | Browser origin; `http://localhost:5173` for development                        |
+| `PORT`                                                                 | Local API port; defaults to `3001`; Render supplies its own port               |
+| `NODE_ENV`                                                             | `development` locally, `production` when hosted                                |
+| `REALTIME_URL`                                                         | Optional override; the production function defaults to the existing Render URL |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Optional image-upload configuration                                            |
 
 Keep secret values in `.env` or hosting settings. Never commit them or prefix them with `VITE_`. See [.env.example](.env.example) for non-secret local examples.
 

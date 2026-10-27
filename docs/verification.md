@@ -73,3 +73,7 @@ Direct requests from this workspace to the production services are blocked by it
 No Vercel, Render, or Atlas management credential is currently available to this workspace. Credential rotation and hosting environment changes cannot be claimed complete without account access or explicit confirmation of the changes. Cloudinary upload calls remain unverified without its optional account configuration.
 
 The user reports the demo video and submission form are complete. They were not edited or independently inspected by this task. See [submission-readiness.md](submission-readiness.md).
+
+## Live acceptance finding and correction
+
+The first live-acceptance run passed account creation/onboarding, project publication/discovery/saving and access checks, application acceptance and role capacity, persistent tasks/resources, and notifications. It then failed because the API did not provide scoped access to the expected external socket service; its test project was archived. The Production Vercel function now defaults to the existing Render URL if `REALTIME_URL` is absent. Local development function runs retain polling, and an explicit environment override is still supported. The Vercel-handler integration test verifies the production URL, scoped token issuance, and rejection of that token for REST authentication. Live verification must be rerun after this correction deploys.
