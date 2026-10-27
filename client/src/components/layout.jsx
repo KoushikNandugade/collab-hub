@@ -87,7 +87,7 @@ export function PublicLayout() {
           <Link to="/explore">Projects</Link>
           <Link to="/people">Community</Link>
           <a
-            href="https://github.com/KoushikNandugade/mern-project"
+            href="https://github.com/KoushikNandugade/collab-hub"
             target="_blank"
             rel="noreferrer"
           >

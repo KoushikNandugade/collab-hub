@@ -220,7 +220,9 @@ test("two people can apply, accept, join a workspace, and exchange direct messag
     ).toBeVisible();
     await applicantPage.goto("/app/workspace/" + project._id + "?tab=team");
     await expect(
-      applicantPage.getByRole("main").getByRole("link", { name: /Team Applicant/ }),
+      applicantPage
+        .getByRole("main")
+        .getByRole("link", { name: /Team Applicant/ }),
     ).toBeVisible();
     await applicantPage.goto("/people/" + owner._id);
     await applicantPage
@@ -231,9 +233,11 @@ test("two people can apply, accept, join a workspace, and exchange direct messag
       .fill("Ready to build something great?");
     await applicantPage.getByRole("button", { name: "Send message" }).click();
     await expect(
-      applicantPage.locator(".message-history").getByText("Ready to build something great?", {
-        exact: true,
-      }),
+      applicantPage
+        .locator(".message-history")
+        .getByText("Ready to build something great?", {
+          exact: true,
+        }),
     ).toBeVisible();
     await ownerPage.goto("/app/messages");
     await ownerPage.getByRole("button", { name: /Team Applicant/ }).click();
@@ -247,13 +251,70 @@ test("two people can apply, accept, join a workspace, and exchange direct messag
       .fill("Absolutely. Welcome to the team!");
     await ownerPage.getByRole("button", { name: "Send message" }).click();
     await expect(
-      applicantPage.locator(".message-history").getByText("Absolutely. Welcome to the team!", {
-        exact: true,
-      }),
-    ).toBeVisible();
+      applicantPage
+        .locator(".message-history")
+        .getByText("Absolutely. Welcome to the team!", {
+          exact: true,
+        }),
+    ).toBeVisible({ timeout: 10000 });
     await ownerContext.request.delete("/api/projects/" + project._id);
   } finally {
     await ownerContext.close();
     await applicantContext.close();
   }
+});
+
+test("a lost session redirects to login and the same account can recover", async ({
+  page,
+  context,
+}) => {
+  const email = `session-${Date.now()}@example.com`;
+  const password = "session-recovery-test-password";
+  const registered = await context.request.post("/api/auth/register", {
+    data: { name: "Session Builder", email, password },
+  });
+  expect(registered.status()).toBe(201);
+  const profile = await context.request.put("/api/profile", {
+    data: {
+      name: "Session Builder",
+      role: "Developer",
+      skills: ["React"],
+      interests: ["Web development"],
+      experience: "beginner",
+      availability: "part-time",
+      collaborationMode: "remote",
+    },
+  });
+  expect(profile.status()).toBe(200);
+  await page.goto("/app");
+  await expect(
+    page.getByRole("heading", { name: "Good to see you, Session." }),
+  ).toBeVisible();
+  await context.clearCookies();
+  await page.getByRole("link", { name: "Create project", exact: true }).click();
+  await page
+    .getByLabel("Project title")
+    .fill("Must not be created without a session");
+  await page
+    .getByLabel("One-line pitch")
+    .fill("Check expired-session recovery through a real protected API call.");
+  await page
+    .getByLabel("Tell the story")
+    .fill(
+      "This valid project must be rejected because its creator no longer has an authenticated browser session.",
+    );
+  await page.getByRole("button", { name: "Publish project" }).click();
+  await expect(page).toHaveURL(/login/);
+  await page.getByLabel("Email address").fill(email);
+  await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "Log in", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "It starts with your idea." }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Overview", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Good to see you, Session." }),
+  ).toBeVisible();
+  const workspace = await context.request.get("/api/dashboard");
+  expect((await workspace.json()).projects).toEqual([]);
 });

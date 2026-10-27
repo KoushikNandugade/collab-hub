@@ -2,6 +2,8 @@
 
 **Find Your People. Build Something Great.**
 
+Project URL: [collab-hub-phi.vercel.app](https://collab-hub-phi.vercel.app) · Repository: [KoushikNandugade/collab-hub](https://github.com/KoushikNandugade/collab-hub)
+
 A full-stack collaboration platform for students, developers, designers, and makers. Discover projects, apply for a role, recruit a team, and build together in a private workspace.
 
 ## What you can do
@@ -65,16 +67,18 @@ Seeding preserves existing users and projects. It inserts six clearly fictional 
 
 ## Commands
 
-| Command            | Purpose                                                    |
-| ------------------ | ---------------------------------------------------------- |
-| `npm ci`           | Install exactly the locked dependency versions             |
-| `npm run dev`      | Run Vite and the API together                              |
-| `npm run build`    | Build the client into `client/dist`                        |
-| `npm start`        | Start Express, serving the built client and Socket.IO      |
-| `npm test`         | Run the MongoDB-backed API and Socket.IO integration tests |
-| `npm run test:e2e` | Run the Playwright browser workflows against a running app |
-| `npm run seed`     | Insert optional example community records                  |
-| `npm run format`   | Format application source and documentation                |
+| Command              | Purpose                                                             |
+| -------------------- | ------------------------------------------------------------------- |
+| `npm ci`             | Install exactly the locked dependency versions                      |
+| `npm run dev`        | Run Vite and the API together                                       |
+| `npm run build`      | Build the client into `client/dist`                                 |
+| `npm start`          | Start Express, serving the built client and Socket.IO               |
+| `npm test`           | Run the MongoDB-backed API and Socket.IO integration tests          |
+| `npm run test:e2e`   | Run the Playwright browser workflows against a running app          |
+| `npm run dev:vercel` | Exercise the Vercel function locally on port 3004                   |
+| `npm run verify`     | API tests, frontend build, and browser suite (running app required) |
+| `npm run seed`       | Insert optional example community records                           |
+| `npm run format`     | Format application source and documentation                         |
 
 The server reads the root `.env` through Node’s built-in environment-file support. Real injected process variables take precedence. Starting `npm start` from the repository root runs the server from its workspace; all paths to the built client are resolved relative to source files.
 
@@ -106,6 +110,9 @@ server/
 e2e/                  # Playwright desktop and mobile workflows
 .github/workflows/    # Build, API tests and browser tests
 compose.yaml          # Local transactional MongoDB and optional app container
+api/index.js          # Vercel serverless entry point for the same Express API
+vercel.json           # Existing Vercel project build and API/SPA rewrites
+scripts/              # Local serverless-function browser-test harness
 Dockerfile            # Multi-stage production image; non-root runtime
 render.yaml           # Render single-service deployment blueprint
 .env.example          # Configuration names and non-secret examples
@@ -115,11 +122,13 @@ render.yaml           # Render single-service deployment blueprint
 
 See [docs/architecture.md](docs/architecture.md) for schemas, API routes, transaction behavior, access controls, and the recommendation formula.
 
-See [docs/deployment.md](docs/deployment.md) for Render + MongoDB Atlas deployment and production environment configuration.
+See [docs/deployment.md](docs/deployment.md) for the existing Vercel deployment, optional Render Socket.IO service, Atlas configuration, and verification steps.
 
 ## Testing
 
-Start the local MongoDB replica set first. `npm test` uses and **drops only** the isolated databases `collabhub_test_phase1` and `collabhub_test_workflows` on the local MongoDB service. Do not point these tests at production.
+See [docs/verification.md](docs/verification.md) for the executed checks and the boundaries of local versus live verification.
+
+Start the local MongoDB replica set first. `npm test` uses and **drops only** the isolated databases `collabhub_test_phase1`, `collabhub_test_workflows`, and `collabhub_test_vercel` on the local MongoDB service. Do not point these tests at production.
 
 The tests cover registration, login, private route access, onboarding, profile privacy, project creation/search/filtering, editing authorization, applications, duplicate prevention, concurrent acceptance/capacity enforcement, invitations, task authorization, private message authorization, real-time authenticated delivery, saved projects, resources, notifications, and matching weights.
 
@@ -136,7 +145,7 @@ For a machine with system Chromium:
 PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e
 ```
 
-The browser tests register disposable accounts, complete onboarding, create a project, create/update a task, reload to verify persistence, add a resource, send a team message, log out/in, and verify mobile discovery and page width. Test projects are archived at the end. Mobile search uses the optional CampusLoop seed project, so run `npm run seed` first.
+The browser tests register disposable accounts, complete onboarding, create a project, create/update a task, reload to verify persistence, add a resource, send a team message, log out/in, verify mobile discovery and page width, and recover a lost session through a real unauthorized API response. Test projects are archived at the end. Mobile search uses the optional CampusLoop seed project, so run `npm run seed` first.
 
 ## Deployment status and scope
 

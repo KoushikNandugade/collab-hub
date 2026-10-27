@@ -81,3 +81,11 @@ Compatibility is a bounded weighted sum:
 - Collaboration preference: 10%
 
 Missing inputs earn no points. Users who have not completed onboarding receive no match score. The API returns the score, matching reasons, and method. This is a deterministic rule-based recommendation system.
+
+## Vercel hosting and shared real-time sessions
+
+`api/index.js` adapts the same Express API to a Vercel Node function. `connectDatabase` coalesces concurrent cold-start connections, bounds the pool, initializes indexes, and reuses warm connections. The function does not serve frontend files; Vercel serves `client/dist` and rewrites API and React Router paths from `vercel.json`.
+
+Without a persistent socket service, messages remain database-backed and refresh every five seconds. When `REALTIME_URL` is configured, the authenticated API issues five-minute tokens with the `collabhub-realtime` audience. Only the Socket.IO authentication path accepts those tokens; REST continues to require the HTTP-only session cookie. Tokens remain in memory. Socket events persist through the same services, and outbound socket delivery checks current user session versions to respect logout across hosts.
+
+The local function harness models static serving separately from `/api` dispatch. CI runs the browser suite against both the ordinary development server and that function harness. Both hosting modes redirect users to login when a protected API rejects their session and clear cached private data.

@@ -1,15 +1,14 @@
 import mongoose from "mongoose";
 import { createServer } from "node:http";
 import { createApp } from "./app.js";
-import { initializeModels } from "./models/index.js";
+import { connectDatabase } from "./services/database.js";
 const uri = process.env.MONGODB_URI;
 if (!uri || !process.env.JWT_SECRET) {
   console.error("Set MONGODB_URI and JWT_SECRET. See .env.example.");
   process.exit(1);
 }
 try {
-  await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
-  await initializeModels();
+  await connectDatabase(uri);
   const app = createApp({
     secret: process.env.JWT_SECRET,
     production: process.env.NODE_ENV === "production",

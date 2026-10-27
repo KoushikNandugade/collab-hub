@@ -13,6 +13,13 @@ export async function api(path, method = "GET", body) {
   const data = await response
     .json()
     .catch(() => ({ error: "Unable to reach the server." }));
+  if (
+    response.status === 401 &&
+    !path.startsWith("/auth/") &&
+    typeof window !== "undefined"
+  ) {
+    window.dispatchEvent(new Event("collabhub:session-expired"));
+  }
   if (!response.ok)
     throw Object.assign(new Error(data.error || "Something went wrong."), {
       status: response.status,

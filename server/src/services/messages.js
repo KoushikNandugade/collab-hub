@@ -2,6 +2,7 @@ import { Conversation, Message } from "../models/index.js";
 import { member } from "../middleware/auth.js";
 import { fail, idEquals } from "../utils/index.js";
 import { notify } from "./events.js";
+import { emitToAuthorizedUser } from "./socket-delivery.js";
 export async function allowedConversation(id, userId) {
   const c = await Conversation.findById(id);
   if (!c) throw fail(404, "Conversation not found.");
@@ -31,7 +32,7 @@ export async function sendMessage(conversationId, user, text, io) {
   );
   await message.populate("sender", "name avatar");
   for (const id of c.participants) {
-    io?.to("user:" + id).emit("message:new", message);
+    await emitToAuthorizedUser(io, id, "message:new", message);
     if (!idEquals(id, user._id))
       await notify(
         id,

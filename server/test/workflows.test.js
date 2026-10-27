@@ -300,6 +300,30 @@ test("Phases 2–4: collaboration, transactions, permissions and real-time deliv
         { text: "A real-time update" },
       );
       assert.equal((await received).text, "A real-time update");
+      const disconnected = new Promise((resolve, reject) => {
+        socket.once("disconnect", resolve);
+        setTimeout(
+          () => reject(new Error("A revoked session remained connected")),
+          3000,
+        ).unref();
+      });
+      // Simulate logout in another serverless instance sharing the same database.
+      await User.updateOne({ _id: owner.id }, { $inc: { tokenVersion: 1 } });
+      await winner.req(
+        "/conversations/" + workspace.conversation._id + "/messages",
+        "POST",
+        { text: "Session revocation check" },
+      );
+      await disconnected;
+      assert.equal(
+        (
+          await owner.req("/auth/login", "POST", {
+            email: "owner@test.example",
+            password: "correct-horse-password",
+          })
+        ).status,
+        200,
+      );
     },
   );
   await t.test(

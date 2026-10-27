@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { Server } from "socket.io";
+import { emitToAuthorizedUser } from "../services/socket-delivery.js";
 import { authenticateToken } from "../middleware/auth.js";
 import { allowedConversation, sendMessage } from "../services/messages.js";
 export function attachSockets(server, secret, origin, app) {
@@ -14,14 +15,21 @@ export function attachSockets(server, secret, origin, app) {
         .split(";")
         .map((s) => s.trim())
         .find((s) => s.startsWith("collabhub_session="));
-      socket.token = cookie?.slice("collabhub_session=".length);
-      socket.user = await authenticateToken(socket.token, secret);
+      socket.realtimeToken = Boolean(socket.handshake.auth?.token);
+      socket.token =
+        socket.handshake.auth?.token ||
+        cookie?.slice("collabhub_session=".length);
+      socket.user = await authenticateToken(socket.token, secret, {
+        realtime: socket.realtimeToken,
+      });
       next();
     } catch {
       next(new Error("Please sign in."));
     }
   });
   io.on("connection", (socket) => {
+    socket.data.sessionVersion = socket.user.tokenVersion;
+    socket.data.expiresAt = jwt.decode(socket.token).exp * 1000;
     socket.join("user:" + socket.user._id);
     const expiry = setTimeout(
       () => socket.disconnect(true),
@@ -35,7 +43,9 @@ export function attachSockets(server, secret, origin, app) {
       (handler) =>
       async (payload = {}, ack = () => {}) => {
         try {
-          socket.user = await authenticateToken(socket.token, secret);
+          socket.user = await authenticateToken(socket.token, secret, {
+            realtime: socket.realtimeToken,
+          });
           await handler(payload, ack);
         } catch (e) {
           if (typeof ack === "function")
@@ -82,7 +92,7 @@ export function attachSockets(server, secret, origin, app) {
         const c = await allowedConversation(conversationId, socket.user._id);
         for (const p of c.participants)
           if (String(p) !== String(socket.user._id))
-            io.to("user:" + p).emit("typing", {
+            await emitToAuthorizedUser(io, p, "typing", {
               conversationId,
               user: socket.user.name,
               typing: !!typing,

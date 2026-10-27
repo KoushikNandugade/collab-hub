@@ -1,4 +1,5 @@
 import express from "express";
+import jwt from "jsonwebtoken";
 import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -23,6 +24,8 @@ export function createApp({
   secret,
   production = false,
   origin = "http://localhost:5173",
+  realtimeUrl = "",
+  serveClient = true,
 }) {
   if (!secret || secret.length < 32)
     throw new Error("JWT_SECRET must be at least 32 characters.");
@@ -34,7 +37,7 @@ export function createApp({
       contentSecurityPolicy: {
         directives: {
           "img-src": ["'self'", "data:", "https:"],
-          "connect-src": ["'self'", "ws:", "wss:"],
+          "connect-src": ["'self'", "https:", "ws:", "wss:"],
           "upgrade-insecure-requests": production ? [] : null,
         },
       },
@@ -66,11 +69,10 @@ export function createApp({
     next();
   });
   app.get("/api/health", (req, res) =>
-    res
-      .status(mongoose.connection.readyState === 1 ? 200 : 503)
-      .json({
-        status: mongoose.connection.readyState === 1 ? "ok" : "unavailable",
-      }),
+    res.status(mongoose.connection.readyState === 1 ? 200 : 503).json({
+      status: mongoose.connection.readyState === 1 ? "ok" : "unavailable",
+      realtime: Boolean(app.get("io")),
+    }),
   );
   const controller = authController({ secret, production });
   const authLimit = rateLimit({
@@ -183,6 +185,29 @@ export function createApp({
     res.json({ user: publicProfile(user), projects });
   });
   app.use("/api", auth(secret));
+  app.get("/api/realtime", (req, res) => {
+    if (app.get("io")) return res.json({ mode: "same-origin" });
+    if (!realtimeUrl) return res.json({ mode: "polling" });
+    let url;
+    try {
+      url = new URL(realtimeUrl);
+    } catch {
+      return res
+        .status(503)
+        .json({ error: "Real-time service URL is invalid." });
+    }
+    if (url.protocol !== "https:")
+      return res
+        .status(503)
+        .json({ error: "The real-time service must use HTTPS." });
+    const token = jwt.sign({ v: req.user.tokenVersion || 0 }, secret, {
+      subject: String(req.user._id),
+      audience: "collabhub-realtime",
+      algorithm: "HS256",
+      expiresIn: "5m",
+    });
+    res.json({ mode: "external", url: url.origin, token });
+  });
   app.get("/api/auth/me", (req, res) => res.json({ user: req.user }));
   app.post("/api/auth/logout", controller.logout);
   app.put("/api/profile", controller.profile);
@@ -229,7 +254,7 @@ export function createApp({
     res.status(404).json({ error: "Endpoint not found." }),
   );
   const dist = fileURLToPath(new URL("../../client/dist", import.meta.url));
-  if (existsSync(dist + "/index.html")) {
+  if (serveClient && existsSync(dist + "/index.html")) {
     app.use(express.static(dist, { index: false }));
     app.get("/{*path}", (req, res) => res.sendFile(dist + "/index.html"));
   }
@@ -243,16 +268,14 @@ export function createApp({
           ? 400
           : 500);
     if (status === 500) console.error(error);
-    res
-      .status(status)
-      .json({
-        error:
-          status === 500
-            ? "Something went wrong. Please try again."
-            : error.code === 11000
-              ? "This record already exists."
-              : error.message,
-      });
+    res.status(status).json({
+      error:
+        status === 500
+          ? "Something went wrong. Please try again."
+          : error.code === 11000
+            ? "This record already exists."
+            : error.message,
+    });
   });
   return app;
 }

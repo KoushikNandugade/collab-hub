@@ -1,9 +1,17 @@
 import jwt from "jsonwebtoken";
 import { User, Project } from "../models/index.js";
 import { fail, idEquals } from "../utils/index.js";
-export async function authenticateToken(token, secret) {
+export async function authenticateToken(
+  token,
+  secret,
+  { realtime = false } = {},
+) {
   try {
-    const payload = jwt.verify(token || "", secret, { algorithms: ["HS256"] });
+    const payload = jwt.verify(token || "", secret, {
+      algorithms: ["HS256"],
+      ...(realtime ? { audience: "collabhub-realtime" } : {}),
+    });
+    if (!realtime && payload.aud) throw new Error();
     const user = await User.findById(payload.sub).select("+tokenVersion");
     if (!user || user.tokenVersion !== payload.v) throw new Error();
     return user;

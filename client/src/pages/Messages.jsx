@@ -36,6 +36,14 @@ export function ChatPane({ conversationId, title = "Conversation" }) {
     queryFn: () =>
       api("/conversations/" + conversationId + "/messages?page=" + page),
     enabled: !!conversationId,
+    refetchInterval: page === 1 ? 5000 : false,
+  });
+  const { data: realtimeAccess } = useQuery({
+    queryKey: ["realtime-access", user?._id],
+    queryFn: () => api("/realtime"),
+    enabled: Boolean(user && conversationId),
+    refetchInterval: 240000,
+    staleTime: 240000,
   });
   useEffect(() => {
     setPage(1);
@@ -43,8 +51,19 @@ export function ChatPane({ conversationId, title = "Conversation" }) {
     setTyping("");
   }, [conversationId]);
   useEffect(() => {
-    if (!user || !conversationId) return;
-    const socket = io({ withCredentials: true });
+    if (
+      !user ||
+      !conversationId ||
+      !realtimeAccess ||
+      realtimeAccess.mode === "polling"
+    )
+      return;
+    const socket = io(realtimeAccess.url || undefined, {
+      withCredentials: true,
+      ...(realtimeAccess.token
+        ? { auth: { token: realtimeAccess.token } }
+        : {}),
+    });
     socketRef.current = socket;
     let timer;
     socket.on("connect", () => {
@@ -70,7 +89,14 @@ export function ChatPane({ conversationId, title = "Conversation" }) {
       clearTimeout(timer);
       socket.disconnect();
     };
-  }, [conversationId, user?._id, cache]);
+  }, [
+    conversationId,
+    user?._id,
+    cache,
+    realtimeAccess?.mode,
+    realtimeAccess?.url,
+    realtimeAccess?.token,
+  ]);
   useEffect(() => {
     bottom.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     cache.invalidateQueries({ queryKey: ["conversations"] });
@@ -80,9 +106,30 @@ export function ChatPane({ conversationId, title = "Conversation" }) {
     if (!text.trim() || sending) return;
     setSending(true);
     try {
-      await api("/conversations/" + conversationId + "/messages", "POST", {
-        text,
-      });
+      if (socketRef.current?.connected) {
+        await new Promise((resolve, reject) => {
+          socketRef.current
+            .timeout(10000)
+            .emit(
+              "message:send",
+              { conversationId, text },
+              (error, response) => {
+                if (error)
+                  return reject(
+                    new Error(
+                      "Delivery is not confirmed yet. Check the conversation before retrying.",
+                    ),
+                  );
+                if (response?.error) return reject(new Error(response.error));
+                resolve(response);
+              },
+            );
+        });
+      } else {
+        await api("/conversations/" + conversationId + "/messages", "POST", {
+          text,
+        });
+      }
       setText("");
       setPage(1);
       cache.invalidateQueries({ queryKey: ["messages", conversationId] });
@@ -111,7 +158,9 @@ export function ChatPane({ conversationId, title = "Conversation" }) {
           <strong>{title}</strong>
           <small>
             <i className={connected ? "online" : ""} />
-            {connected ? "Live conversation" : "Connecting to live updates…"}
+            {connected
+              ? "Live conversation"
+              : "Messages refresh every few seconds"}
           </small>
         </div>
       </div>
