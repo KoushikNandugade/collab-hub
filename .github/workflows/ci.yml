@@ -4,7 +4,7 @@ permissions:
   contents: read
 jobs:
   verify:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     env:
       MONGODB_URI: mongodb://127.0.0.1:27017/collabhub_e2e?replicaSet=rs0&directConnection=true
