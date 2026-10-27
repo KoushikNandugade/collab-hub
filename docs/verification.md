@@ -4,16 +4,16 @@ Recorded on **28 October 2026 IST** for **CollabHub**. Public application: **htt
 
 ## Confirmed GitHub Actions result
 
-[Run 40594581510](https://github.com/KoushikNandugade/collab-hub/actions/runs/40594581510) completed successfully at commit `b8550ab`.
+[Run 40604079512](https://github.com/KoushikNandugade/collab-hub/actions/runs/40604079512) completed successfully at commit `024220a`.
 
 | Check                              | Result                                  |
 | ---------------------------------- | --------------------------------------- |
 | MongoDB replica-set startup        | Passed                                  |
 | API / Socket.IO / serverless suite | 22 passed; 0 failed; 0 skipped          |
 | Frontend build                     | Passed; output `client/dist`            |
-| Vite/Express browser suite         | 4 passed in 23.1 seconds                |
+| Vite/Express browser suite         | 4 passed in 23.7 seconds                |
 | Vercel-function browser suite      | Same 4 scenarios passed in 20.6 seconds |
-| Overall hosted CI                  | Success in 1 minute 57 seconds          |
+| Overall hosted CI                  | Success in 1 minute 46 seconds          |
 
 The latest run for subsequent commits is visible in [GitHub Actions](https://github.com/KoushikNandugade/collab-hub/actions/workflows/ci.yml). A past green run is not a claim that every later commit or production deployment has been verified.
 
@@ -52,7 +52,7 @@ To run it yourself without creating records:
 node scripts/check-deployment.mjs
 ```
 
-The check retries to allow a sleeping Render instance to wake. A transport handshake does not establish authenticated message delivery. Registration, recruitment, workspace persistence, and two-account messaging still require a signed-in live browser check.
+The check retries to allow a sleeping Render instance to wake. A transport handshake does not establish authenticated message delivery. The separate signed-in live browser check below verifies registration, recruitment, workspace persistence, and two-account messaging.
 
 ## Confirmed public endpoint result
 
@@ -62,13 +62,27 @@ The check retries to allow a sleeping Render instance to wake. A transport hands
 
 The separate **Verify live workflows** workflow runs `scripts/check-live-workflows.mjs`. It creates two clearly labeled verification accounts with random passwords kept only in memory, exercises recruitment, persistence, notifications, scoped cross-host socket authentication, live message/typing delivery, logout revocation, and the actual browser UI, then archives its project and signs the accounts out. The app has no account deletion API, so the labeled profiles remain. Its reports omit emails, passwords, cookies, tokens, response bodies, and browser traces.
 
-This operation creates records and requires `LIVE_ACCEPTANCE_ALLOW_WRITES=1`; it is separate from the read-only endpoint check and ordinary local test suite. The live workflow follows a successful main CI run so hosting has time to deploy. It runs for application/live-check changes or an explicit manual dispatch; documentation-only commits do not create additional accounts. Its hosted result must be inspected before marking authenticated production workflows verified.
+This operation creates records and requires `LIVE_ACCEPTANCE_ALLOW_WRITES=1`; it is separate from the read-only endpoint check and ordinary local test suite. The live workflow follows a successful main CI run so hosting has time to deploy. It runs for application/live-check changes or an explicit manual dispatch; documentation-only commits do not create additional accounts. The executed hosted result is recorded below; a run where the test step was skipped is not counted as live verification.
+
+## Confirmed authenticated production result
+
+[Live acceptance run 40604285227](https://github.com/KoushikNandugade/collab-hub/actions/runs/40604285227) completed successfully against the existing Vercel and Render URLs after the successful main CI run for commit `024220a`. The dependency install, browser install, live test step, and report upload all executed; this was not a skipped test run. Total duration was 2 minutes 10 seconds.
+
+All seven reported checks passed:
+
+1. Register accounts, enforce session-cookie protections, and complete onboarding.
+2. Publish, discover, save, and protect a project; reject invalid input and unauthorized access.
+3. Apply, reject duplicate operations, accept membership, and update team capacity.
+4. Persist assigned task changes, resources, and notifications.
+5. Authenticate socket access across hosts, deliver and persist messages and typing, revoke access on logout, and sign in again.
+6. Use the published browser UI for login, task persistence after reload, mobile discovery without horizontal overflow, live conversation connection, message delivery, and message persistence after reload.
+7. Archive the verification project. Verification accounts were signed out; labeled profiles remain as documented above.
 
 ## Current production boundary
 
-The supplied Render dashboard showed Live and Vercel completed deployment. A previous configuration error was followed by the successful hosted endpoint check above. Authenticated workflow readiness is tracked separately; neither a build nor a transport handshake is presented as proof of signed-in live behavior.
+The supplied Render dashboard showed Live and Vercel completed deployment. A previous configuration error was followed by the successful hosted endpoint check above. Authenticated workflows are now independently confirmed by the executed live acceptance run above. Build, endpoint, and signed-in browser checks remain distinct evidence.
 
-Direct requests from this workspace to the production services are blocked by its egress proxy before reaching them (`CONNECT 403`). The public-deployment workflow provides a separate hosted verification path; record its actual result before declaring the endpoints ready.
+Direct requests from this workspace to the production services are blocked by its egress proxy before reaching them (`CONNECT 403`). The successful hosted endpoint and live-browser runs above provide independent verification from GitHub Actions.
 
 No Vercel, Render, or Atlas management credential is currently available to this workspace. Credential rotation and hosting environment changes cannot be claimed complete without account access or explicit confirmation of the changes. Cloudinary upload calls remain unverified without its optional account configuration.
 
@@ -76,4 +90,4 @@ The user reports the demo video and submission form are complete. They were not 
 
 ## Live acceptance finding and correction
 
-The first live-acceptance run passed account creation/onboarding, project publication/discovery/saving and access checks, application acceptance and role capacity, persistent tasks/resources, and notifications. It then failed because the API did not provide scoped access to the expected external socket service; its test project was archived. The Production Vercel function now defaults to the existing Render URL if `REALTIME_URL` is absent. Local development function runs retain polling, and an explicit environment override is still supported. The Vercel-handler integration test verifies the production URL, scoped token issuance, and rejection of that token for REST authentication. Live verification must be rerun after this correction deploys.
+The first live-acceptance run passed account creation/onboarding, project publication/discovery/saving and access checks, application acceptance and role capacity, persistent tasks/resources, and notifications. It then failed because the API did not provide scoped access to the expected external socket service; its test project was archived. The Production Vercel function now defaults to the existing Render URL if `REALTIME_URL` is absent. Local development function runs retain polling, and an explicit environment override is still supported. The Vercel-handler integration test verifies the production URL, scoped token issuance, and rejection of that token for REST authentication. The successful executed live acceptance run above verifies this correction in production.
