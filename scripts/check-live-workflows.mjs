@@ -486,14 +486,18 @@ try {
         await memberPage
           .getByRole("button", { name: "Send message", exact: true })
           .click();
-        await expect(ownerPage.getByText(message, { exact: true })).toBeVisible(
-          { timeout: 15000 },
-        );
+        await expect(
+          ownerPage
+            .locator(".message-history")
+            .getByText(message, { exact: true }),
+        ).toBeVisible({ timeout: 15000 });
         browserStage = "browser message persistence after reload";
         await ownerPage.reload();
-        await expect(ownerPage.getByText(message, { exact: true })).toBeVisible(
-          { timeout: 15000 },
-        );
+        await expect(
+          ownerPage
+            .locator(".message-history")
+            .getByText(message, { exact: true }),
+        ).toBeVisible({ timeout: 15000 });
       } catch (error) {
         if (!error.safeDetail)
           error.safeDetail = `Browser verification failed during ${browserStage}.`;

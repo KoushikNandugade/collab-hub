@@ -62,7 +62,7 @@ The check retries to allow a sleeping Render instance to wake. A transport hands
 
 The separate **Verify live workflows** workflow runs `scripts/check-live-workflows.mjs`. It creates two clearly labeled verification accounts with random passwords kept only in memory, exercises recruitment, persistence, notifications, scoped cross-host socket authentication, live message/typing delivery, logout revocation, and the actual browser UI, then archives its project and signs the accounts out. The app has no account deletion API, so the labeled profiles remain. Its reports omit emails, passwords, cookies, tokens, response bodies, and browser traces.
 
-This operation creates records and requires `LIVE_ACCEPTANCE_ALLOW_WRITES=1`; it is separate from the read-only endpoint check and ordinary local test suite. Its hosted result must be inspected before marking authenticated production workflows verified.
+This operation creates records and requires `LIVE_ACCEPTANCE_ALLOW_WRITES=1`; it is separate from the read-only endpoint check and ordinary local test suite. The live workflow follows a successful main CI run so hosting has time to deploy. It runs for application/live-check changes or an explicit manual dispatch; documentation-only commits do not create additional accounts. Its hosted result must be inspected before marking authenticated production workflows verified.
 
 ## Current production boundary
 

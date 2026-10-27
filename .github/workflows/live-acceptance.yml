@@ -1,11 +1,10 @@
 name: Verify live workflows
 on:
   workflow_dispatch:
-  push:
+  workflow_run:
+    workflows: [Verify CollabHub]
+    types: [completed]
     branches: [main]
-    paths:
-      - scripts/check-live-workflows.mjs
-      - .github/workflows/live-acceptance.yml
 permissions:
   contents: read
 concurrency:
@@ -13,23 +12,43 @@ concurrency:
   cancel-in-progress: false
 jobs:
   live-workflows:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
+      - name: Select application changes for live verification
+        id: scope
+        env:
+          MANUAL_RUN: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          git diff-tree --no-commit-id --name-only -r HEAD > /tmp/collabhub-live-changes.txt
+          if [ "$MANUAL_RUN" = true ] || rg -q '^(api/|client/|server/src/|scripts/check-live-workflows\.mjs$|\.github/workflows/live-acceptance\.yml$)' /tmp/collabhub-live-changes.txt; then
+            echo 'verify=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'verify=false' >> "$GITHUB_OUTPUT"
+            echo 'Live application checks skipped: this commit changes documentation or local tooling only.' >> "$GITHUB_STEP_SUMMARY"
+          fi
       - uses: actions/setup-node@v6
+        if: steps.scope.outputs.verify == 'true'
         with:
           node-version: 22
           cache: npm
       - run: npm ci --include=dev --no-audit --no-fund
+        if: steps.scope.outputs.verify == 'true'
       - run: npx playwright install --with-deps chromium
+        if: steps.scope.outputs.verify == 'true'
       - name: Verify deployed workflows using labeled test accounts
+        if: steps.scope.outputs.verify == 'true'
         env:
           LIVE_ACCEPTANCE_ALLOW_WRITES: "1"
           LIVE_ACCEPTANCE_REPORT_PATH: /tmp/collabhub-live-workflow-report.json
         run: node scripts/check-live-workflows.mjs
       - uses: actions/upload-artifact@v6
-        if: always()
+        if: always() && steps.scope.outputs.verify == 'true'
         with:
           name: live-workflow-report
           path: /tmp/collabhub-live-workflow-report.json
