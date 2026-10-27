@@ -26,12 +26,20 @@ jobs:
           MANUAL_RUN: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           git diff-tree --no-commit-id --name-only -r HEAD > /tmp/collabhub-live-changes.txt
-          if [ "$MANUAL_RUN" = true ] || rg -q '^(api/|client/|server/src/|scripts/check-live-workflows\.mjs$|\.github/workflows/live-acceptance\.yml$)' /tmp/collabhub-live-changes.txt; then
-            echo 'verify=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'verify=false' >> "$GITHUB_OUTPUT"
-            echo 'Live application checks skipped: this commit changes documentation or local tooling only.' >> "$GITHUB_STEP_SUMMARY"
-          fi
+          python3 - <<'PY_SCOPE'
+          import os
+          import re
+          from pathlib import Path
+          changed = Path("/tmp/collabhub-live-changes.txt").read_text().splitlines()
+          pattern = re.compile(r"^(api/|client/|server/(src/|package\.json$)|package(-lock)?\.json$|vercel\.json$|scripts/check-live-workflows\.mjs$|\.github/workflows/live-acceptance\.yml$)")
+          selected = os.environ["MANUAL_RUN"] == "true" or any(pattern.search(path) for path in changed)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write("verify=" + str(selected).lower() + "\n")
+          print("Run live verification:", selected)
+          if not selected:
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+                  summary.write("Live checks skipped: documentation or local tooling changes only.\n")
+          PY_SCOPE
       - uses: actions/setup-node@v6
         if: steps.scope.outputs.verify == 'true'
         with:
