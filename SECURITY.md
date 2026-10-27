@@ -17,6 +17,14 @@ Include affected functionality, reproduction steps, potential impact, and a mini
 - Vercel and Render require the same database and JWT signing secret for linked socket sessions.
 - Logout revokes the user's existing sessions. Changing the shared signing secret invalidates sessions for all users.
 
+## Retiring credentials previously shared outside secure settings
+
+For the application database, create a replacement Atlas database user/password restricted to the application database, then update `MONGODB_URI` securely on both Vercel Production and Render. Redeploy both, check their health, and verify a signed-in workflow before retiring the old application credential. Confirm the old user is not needed by another application before removing it. Keep `JWT_SECRET` identical on both hosts; changing it is a separate session-revocation operation.
+
+Revoke the previously shared Render account API key in the account's API-key settings. A normal dashboard-managed Web Service does not need that key as an application environment variable. Do not merely delete a key from chat or Git and assume it has been revoked.
+
+This repository documents the procedure; rotation is complete only when the corresponding Atlas and Render account operations have actually succeeded. Enter replacement values in secure account settings, never in issues or source files.
+
 ## Scope and limitations
 
 The application uses HTTP-only cookies, production Secure cookies, origin checks for mutations, password hashing, schema validation, and access checks for private resources. These controls do not constitute an independent security audit.

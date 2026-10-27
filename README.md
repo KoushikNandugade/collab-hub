@@ -9,6 +9,28 @@ A MERN collaboration platform where students, developers, designers, and makers 
 
 [Open CollabHub](https://collab-hub-phi.vercel.app) · [Setup and deployment](docs/deployment.md) · [Architecture and API](docs/architecture.md) · [Demo checklist](docs/demo.md)
 
+## Problem statement
+
+Students and independent makers often have project ideas but struggle to find collaborators with the right skills, interests, and availability. Recruitment happens in disconnected chats, while applications, team capacity, tasks, resources, and discussions become difficult to track.
+
+## Target users
+
+CollabHub is built for students, developers, designers, and makers who want to join a project or recruit a small team for a side project, hackathon, or open-source idea.
+
+## Solution
+
+CollabHub brings discovery, recruitment, and delivery into one application. Owners publish projects with specific openings; collaborators apply or receive invitations. Acceptance updates team membership and available capacity in a transaction, then grants access to a private workspace with tasks, resources, and persisted conversations.
+
+## Core workflows
+
+| Workflow                            | User outcome                                                                                       |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Register and complete onboarding    | Establish an account, skills, interests, and collaboration preferences                             |
+| Discover a project and apply        | Search suitable projects, inspect openings, save an idea, and submit an application                |
+| Review an application or invitation | Admit a collaborator without exceeding role or team capacity                                       |
+| Collaborate in a private workspace  | Assign tasks, update Kanban status, share resources, and retain progress across sessions           |
+| Communicate and return              | Exchange direct/project messages, receive notifications, and recover access after signing in again |
+
 ## Features
 
 - **Profiles and onboarding:** skills, interests, experience, availability, goals, and portfolio links.
@@ -32,6 +54,21 @@ Pages read real database records. Sample community content is available through 
 | Sessions and messaging | JWT, bcrypt, HTTP-only cookies, Socket.IO                                      |
 | Testing                | Node.js test runner, Playwright, GitHub Actions                                |
 | Hosting                | Vercel frontend/API, Render Web Service for persistent sockets, MongoDB Atlas  |
+
+## Architecture
+
+```mermaid
+flowchart LR
+  Browser[React application] -->|Same-origin REST and session cookie| Vercel[Vercel Node function / Express]
+  Vercel -->|Models, queries, transactions| Database[(MongoDB Atlas)]
+  Browser -->|Scoped socket token| Render[Render / Socket.IO]
+  Render -->|Membership checks and message persistence| Database
+  Vercel -->|Optional image uploads| Cloudinary[Cloudinary]
+```
+
+Vercel serves the built React application and the shared Express API. MongoDB stores accounts, projects, recruitment state, tasks, conversations, and notifications. Render maintains socket connections for live messaging; the browser falls back to periodic message refresh when sockets are unavailable. Sessions use HTTP-only cookies; cross-host socket access uses short-lived, audience-restricted tokens. The same API can also run as a standalone Express service.
+
+See [architecture and API reference](docs/architecture.md) for data models and routes, and [engineering decisions](docs/engineering-decisions.md) for the reasoning and tradeoffs.
 
 ## Run locally
 
@@ -140,7 +177,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Browser tests create disposable users and exercise onboarding, projects, persistent tasks, resources, messages, recruitment, session recovery, and mobile discovery. They mutate the target database; use a local development environment. GitHub Actions runs the suite against both Vite/Express and the Vercel function harness. See the [verification record](docs/verification.md) for completed checks and their limits.
+Browser tests create disposable users and exercise onboarding, projects, persistent tasks, resources, messages, recruitment, session recovery, and mobile discovery. They mutate the target database; use a local development environment. GitHub Actions runs the suite against both Vite/Express and the Vercel function harness. See the [verification record](docs/verification.md) for completed checks and their limits. The [submission checklist](docs/submission-readiness.md) maps this evidence to the end-term guidelines.
 
 ## Deployment
 
@@ -150,7 +187,7 @@ Browser tests create disposable users and exercise onboarding, projects, persist
 
 Both hosts need their own **identical** `MONGODB_URI` and `JWT_SECRET` values. Set `CLIENT_ORIGIN=https://collab-hub-phi.vercel.app` on Render and `REALTIME_URL=https://collab-hub-d51v.onrender.com` on Vercel. Redeploy after changing variables. Render uses a normal Node Web Service; no Blueprint or account API key is needed for dashboard setup.
 
-A successful build does not verify runtime configuration. At the latest reported check, Render showed **Live** and Vercel completed deployment, but the Vercel API reported a missing/invalid environment configuration. See [deployment troubleshooting](docs/deployment.md#troubleshooting) before treating the live application as verified.
+The separate **Verify public deployment** workflow checks the published page, API/database readiness, signed-out authorization, and Render transport/CORS without creating application records. It can be run from GitHub Actions; it also runs when its checker or workflow changes. A successful build does not verify runtime configuration. At the latest reported check, Render showed **Live** and Vercel completed deployment, but the Vercel API reported a missing/invalid environment configuration. See [deployment troubleshooting](docs/deployment.md#troubleshooting) before treating the live application as verified.
 
 ## Scope
 

@@ -1,0 +1,28 @@
+name: Verify public deployment
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/check-deployment.mjs
+      - .github/workflows/deployment-health.yml
+permissions:
+  contents: read
+jobs:
+  public-endpoints:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Verify public HTTP endpoints
+        env:
+          DEPLOYMENT_REPORT_PATH: /tmp/collabhub-deployment-report.json
+        run: node scripts/check-deployment.mjs
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: public-deployment-report
+          path: /tmp/collabhub-deployment-report.json

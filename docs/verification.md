@@ -1,61 +1,65 @@
 # Verification record
 
-Verified locally on 28 October 2026. The existing public URL remains **https://collab-hub-phi.vercel.app** and the renamed repository is **KoushikNandugade/collab-hub**.
+Recorded on **28 October 2026 IST** for **CollabHub**. Public application: **https://collab-hub-phi.vercel.app**. Repository: **KoushikNandugade/collab-hub**.
 
-## Results
+## Confirmed GitHub Actions result
 
-| Check                                                  | Result                                                                                        |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| `npm test`                                             | 22 passed, 0 failed, 0 skipped                                                                |
-| `npm run build`                                        | Passed; client pages split into separate bundles                                              |
-| Browser suite against Vite + Express                   | 4 passed                                                                                      |
-| Same browser suite against the Vercel function harness | 4 passed                                                                                      |
-| `npm audit --audit-level=high`                         | 0 vulnerabilities                                                                             |
-| Node.js 22 production container                        | Built; MongoDB health and built SPA requests passed; runtime UID 1000                         |
-| Function dependency trace                              | Express, database helper, models, Mongoose and native bcrypt present; credential files absent |
-| `git diff --check`                                     | Passed                                                                                        |
+[Run 40594581510](https://github.com/KoushikNandugade/collab-hub/actions/runs/40594581510) completed successfully at commit `b8550ab`.
 
-The container build used already-verified npm cache artifacts because this cloud environment's nested Docker network cannot resolve the npm registry. Lockfile integrity checks remained enabled.
+| Check                              | Result                                  |
+| ---------------------------------- | --------------------------------------- |
+| MongoDB replica-set startup        | Passed                                  |
+| API / Socket.IO / serverless suite | 22 passed; 0 failed; 0 skipped          |
+| Frontend build                     | Passed; output `client/dist`            |
+| Vite/Express browser suite         | 4 passed in 23.1 seconds                |
+| Vercel-function browser suite      | Same 4 scenarios passed in 20.6 seconds |
+| Overall hosted CI                  | Success in 1 minute 57 seconds          |
 
-## Workflows exercised
+The latest run for subsequent commits is visible in [GitHub Actions](https://github.com/KoushikNandugade/collab-hub/actions/workflows/ci.yml). A past green run is not a claim that every later commit or production deployment has been verified.
 
-The API tests use isolated local replica-set databases. They cover registration/login, HTTP-only secure cookies, protected endpoints, onboarding, public-profile privacy, project creation and search, owner authorization, duplicate application prevention, concurrent acceptance into the final team slot, invitations, membership, task authorization and persistence, resource links, notifications, saved projects, authenticated Socket.IO delivery, session revocation, and matching weights.
+## Additional completed local checks
 
-Serverless-specific checks exercise the actual `api/index.js` handler: missing configuration returns a safe 503, concurrent requests reuse a database connection, cookies authenticate across function requests, projects persist, and short-lived real-time tokens cannot authenticate REST calls.
+- Production Node.js 22 image built and served MongoDB health and the compiled SPA with runtime UID 1000.
+- Function dependency tracing included Express, models, Mongoose, and native bcrypt, without credential files.
+- Dependency audit reported zero vulnerabilities at the time it was run; this is a point-in-time result.
+- Known private JWT and Atlas values were absent from Git history. Common MongoDB URI/token/private-key patterns were also checked.
+- Local browser workflows passed in both manually started and Playwright-managed server modes.
+- Local configuration files remain ignored by Git.
 
-The browser suites exercise registration, onboarding, project creation, task changes surviving reload, resource creation, persisted discussion messages, logout/login, mobile discovery, two separate users applying and accepting membership, private workspace access, bidirectional direct messages, and recovering a lost session without creating unauthorized data. The Vercel harness separately models static frontend serving and API routing; conversations there use periodic refresh.
+The local production container build used integrity-verified npm cache artifacts because nested Docker DNS could not resolve the registry. Integrity and TLS verification remained enabled.
 
-## Deployment boundaries
+## What the tests exercise
 
-Requests from this cloud environment to the production Vercel domain were blocked by its egress proxy before reaching the application (`CONNECT 403`). Consequently, these results do **not** establish that the deployed Vercel build, its runtime variables, Atlas access, or its edge rewrites are healthy. The exact Vercel hostname has been added to the saved environment network draft; applying the draft is a separate user action.
+API checks cover registration/login, HTTP-only secure cookies, onboarding, public-profile privacy, owner/member permissions, discovery, duplicate applications, concurrent acceptance into a final team slot, invitations, tasks, resources, saved projects, notifications, private messaging, authenticated socket delivery, session revocation, and matching weights.
 
-The supplied Render dashboard shows the standard Web Service at **https://collab-hub-d51v.onrender.com** as Live on commit `432b252`. The supplied Vercel build log confirms deployment completed for the same commit. Subsequent Vercel runtime logs report `startup_failed` with `category: configuration`, indicating a missing `MONGODB_URI` or missing/short `JWT_SECRET`. Correct the Production variables and redeploy before claiming the live API is healthy. Linked Socket.IO delivery still requires matching database/signing values on both hosts and a successful two-browser check. Render Live status is not a substitute for that browser verification.
+The actual Vercel handler is tested for safe startup failure, connection reuse, cookie authentication, persistence, and scoped socket tokens that cannot authenticate REST requests.
 
-Cloudinary upload calls remain unverified without that account's credentials. The URI-based image fields work independently.
+Browser scenarios cover registration/onboarding, project creation, persistent task changes, resources, discussions, logout/login, mobile discovery, application acceptance across two users, private workspace access, direct messaging, and lost-session recovery without unauthorized writes.
 
-## Required production checks
+## CI compatibility decisions
 
-After correcting the Vercel runtime environment and redeploying, verify:
+MongoDB 8.0.34 explicitly refuses Linux kernels 6.19 and newer, citing SERVER-121912. The [published Ubuntu 22.04 runner manifest](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2204-Readme.md) reports kernel `6.8.0-1064-azure` in image `20261023.322.3`; CI therefore uses `ubuntu-22.04` and an immutable MongoDB image.
 
-1. `/api/health` returns JSON with `status: "ok"`.
-2. `/api/projects` returns JSON containing an `items` array.
-3. `/api/auth/me` returns JSON 401 when signed out.
-4. Register, onboard, create a project and task, and reload.
-5. Apply and accept using two separate browser profiles.
-6. Confirm persisted messages and, when Render is configured, live delivery and typing indicators.
+Node 22.23.3 watch mode tries to watch an optional `.env` path even when the file is missing. An empty ignored `.env` is created in CI; values remain injected by the job. This failure and the empty-file correction were reproduced in Node 22 locally. Playwright owns server startup/cleanup and waits for the proxied `/api/health` endpoint instead of relying on a background shell process.
 
-Use the existing Vercel project and domain. No new frontend project or domain is required. See [deployment instructions](deployment.md).
+## Public deployment verification
 
-## Startup failure diagnostics follow-up
+A separate **Verify public deployment** workflow runs `scripts/check-deployment.mjs` without account credentials or application writes. It verifies the application HTML, Vercel API/database health, public discovery, signed-out 401 behavior, Render health, and transport/CORS for the existing browser origin. It publishes a JSON artifact and readable job summary, and exits unsuccessfully when a requirement fails.
 
-A supplied Render log showed a successful build followed by `MongooseServerSelectionError` at startup. Safe structured diagnostics were added to distinguish network/server selection, DNS, authentication, and missing configuration without logging connection strings or secrets. Four additional tests verify those categories and credential non-disclosure; the full API/integration suite now passes 22 tests. The later supplied dashboard shows Render Live; direct production health and cross-host messaging checks remain unverified from this environment.
+To run it yourself without creating records:
 
-## GitHub Actions runner follow-up
+```bash
+node scripts/check-deployment.mjs
+```
 
-The public Actions page for run `40585120206` identifies **Start transactional MongoDB** as the failing step, before application tests. Its detailed logs require authenticated access. The original startup sequence succeeded against a fresh local container, so the exact remote cause was not established by that reproduction. CI now uses Ubuntu 22.04 and an immutable MongoDB image, waits explicitly for the replica-set process and primary, and collects container state, MongoDB logs, and available app logs on failure. Action versions use Node.js 24-compatible releases. These changes require a new GitHub Actions run to verify the hosted runner.
+The check retries to allow a sleeping Render instance to wake. A transport handshake does not establish authenticated message delivery. Registration, recruitment, workspace persistence, and two-account messaging still require a signed-in live browser check.
 
-A subsequent hosted run passed database startup, API tests, and the build, then all browser workflows failed with `ECONNREFUSED` to port 5173. CI now uses Playwright's `webServer` lifecycle instead of background shell processes. Readiness is checked through `/api/health` on the browser's origin, so the development proxy and API must both respond before tests begin. Set `E2E_START_SERVER=dev` or `E2E_START_SERVER=vercel` to use this lifecycle locally; ordinary browser runs can still target an already-running app. GitHub's browser reporter publishes individual failures as annotations.
+## Current production boundary
 
-The isolated MongoDB diagnostic later identified the exact intermittent startup failure: MongoDB 8.0.34 refuses Linux kernels 6.19 and newer, citing SERVER-121912. The published Ubuntu 22.04 runner image reports kernel `6.8.0-1064-azure` (image `20261023.322.3`), so CI is pinned to `ubuntu-22.04` rather than the newer runner image. Source: [GitHub runner image manifest](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2204-Readme.md). No production database or Atlas settings were changed.
+The supplied Render dashboard showed Live, and a supplied Vercel log confirmed deployment completed. The last supplied Vercel runtime event was `startup_failed` with `category: configuration`, meaning a missing `MONGODB_URI` or missing/short `JWT_SECRET`. Production cannot be marked healthy solely from build success or local CI.
 
-The captured development-server log identified the second CI failure: Node 22.23.3's watch mode throws `ENOENT` while watching a missing optional `.env` file, even with `--env-file-if-exists`. This terminates the API process, and `concurrently -k` then stops Vite. CI now creates an empty, ignored root `.env` before browser tests. Runtime settings remain injected by the workflow; no secrets are written into that file. Normal local setup already creates `.env` from `.env.example`.
+Direct requests from this workspace to the production services are blocked by its egress proxy before reaching them (`CONNECT 403`). The public-deployment workflow provides a separate hosted verification path; record its actual result before declaring the endpoints ready.
+
+No Vercel, Render, or Atlas management credential is currently available to this workspace. Credential rotation and hosting environment changes cannot be claimed complete without account access or explicit confirmation of the changes. Cloudinary upload calls remain unverified without its optional account configuration.
+
+The user reports the demo video and submission form are complete. They were not edited or independently inspected by this task. See [submission-readiness.md](submission-readiness.md).
