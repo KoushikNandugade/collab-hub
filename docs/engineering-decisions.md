@@ -28,7 +28,7 @@ Matching uses explicit weights for skills, interests, availability, experience, 
 
 ## Verification strategy
 
-API tests exercise sessions, permissions, transactional admission, persistence, and socket behavior. Four browser scenarios run against Vite/Express and the Vercel function harness. A separate read-only public-deployment check verifies hosted HTTP readiness and socket transport/CORS. It does not replace authenticated live browser tests.
+API tests exercise sessions, permissions, transactional admission, persistence, and socket behavior. Four browser scenarios run against Vite/Express and the Vercel function harness. A separate read-only public-deployment check verifies hosted HTTP readiness and socket transport/CORS. It does not replace authenticated live browser tests. A separate opt-in live-acceptance workflow uses two labeled accounts with random, undisclosed passwords, verifies the published workflows and browser UI, then archives its test project. The profiles remain because account deletion is outside this version’s scope; no credentials or browser traces are included in the report.
 
 CI uses a MongoDB-compatible Ubuntu runner and creates an empty ignored `.env` for Node 22's development watcher. Values remain injected by the workflow. See [verification.md](verification.md).
 

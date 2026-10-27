@@ -134,4 +134,4 @@ Prepare the private `.env.production` file with the required variables and set `
 
 ## Current verification boundary
 
-The supplied Vercel log confirms successful deployment, and the supplied Render dashboard shows Live at commit `432b252`. The latest Vercel runtime log reports `category: configuration`; its environment settings still need correction and revalidation. This cloud environment cannot independently reach either production domain through its outbound proxy. See [verification.md](verification.md) for local results and outstanding checks.
+The [hosted public-deployment check](https://github.com/KoushikNandugade/collab-hub/actions/runs/40600436400) passed all six endpoint checks at commit `24e0fe5`. This supersedes the earlier Vercel configuration failure. Direct requests from this workspace remain blocked by its outbound proxy; the hosted check provides public endpoint evidence. Authenticated live workflows and account-level credential rotation are tracked separately in [verification.md](verification.md).

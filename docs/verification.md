@@ -54,9 +54,19 @@ node scripts/check-deployment.mjs
 
 The check retries to allow a sleeping Render instance to wake. A transport handshake does not establish authenticated message delivery. Registration, recruitment, workspace persistence, and two-account messaging still require a signed-in live browser check.
 
+## Confirmed public endpoint result
+
+[Public deployment run 40600436400](https://github.com/KoushikNandugade/collab-hub/actions/runs/40600436400) passed all six checks at commit `24e0fe5` in 52 seconds. Both deployed APIs returned healthy database status; public discovery, signed-out 401 behavior, and Render transport/CORS also passed. The earlier Vercel configuration failure is therefore historical, not the latest observed endpoint result.
+
+## Authenticated live acceptance
+
+The separate **Verify live workflows** workflow runs `scripts/check-live-workflows.mjs`. It creates two clearly labeled verification accounts with random passwords kept only in memory, exercises recruitment, persistence, notifications, scoped cross-host socket authentication, live message/typing delivery, logout revocation, and the actual browser UI, then archives its project and signs the accounts out. The app has no account deletion API, so the labeled profiles remain. Its reports omit emails, passwords, cookies, tokens, response bodies, and browser traces.
+
+This operation creates records and requires `LIVE_ACCEPTANCE_ALLOW_WRITES=1`; it is separate from the read-only endpoint check and ordinary local test suite. Its hosted result must be inspected before marking authenticated production workflows verified.
+
 ## Current production boundary
 
-The supplied Render dashboard showed Live, and a supplied Vercel log confirmed deployment completed. The last supplied Vercel runtime event was `startup_failed` with `category: configuration`, meaning a missing `MONGODB_URI` or missing/short `JWT_SECRET`. Production cannot be marked healthy solely from build success or local CI.
+The supplied Render dashboard showed Live and Vercel completed deployment. A previous configuration error was followed by the successful hosted endpoint check above. Authenticated workflow readiness is tracked separately; neither a build nor a transport handshake is presented as proof of signed-in live behavior.
 
 Direct requests from this workspace to the production services are blocked by its egress proxy before reaching them (`CONNECT 403`). The public-deployment workflow provides a separate hosted verification path; record its actual result before declaring the endpoints ready.
 
