@@ -129,6 +129,19 @@ Enter credentials only in secure hosting/environment settings. Do not paste them
 
 Cloudinary is optional to run the core platform. Without its configuration, upload controls show a clear configuration error and users can use HTTPS image URLs. Uploads must be verified separately once your account is configured.
 
+## Troubleshoot Atlas connection failures at startup
+
+If Render reports **Build successful** and then `MongooseServerSelectionError` when running `npm start`, the frontend build completed but the backend could not select a MongoDB server. This alone does not identify a bad password. The `../.env not found. Continuing without it.` notice is expected on Render because runtime values come from the Environment settings.
+
+Check these prerequisites:
+
+1. In the Render service, open **Connect → Outbound** and copy its outbound IP addresses/CIDR ranges.
+2. In the Atlas project, open **Security → Network Access → IP Access List**. Add those Render outbound ranges and wait for the entries to become Active.
+3. Confirm the Atlas cluster is running and `MONGODB_URI` in Render is the intended connection string for an Atlas database user.
+4. Redeploy the existing Render service after the access rules are active.
+
+Startup logs now contain a `startup_failed` JSON event with a category, driver error codes, topology type, and fixed troubleshooting guidance. They omit error messages, stack traces, server addresses, URI values, passwords, and JWT secrets. `server-selection` points to cluster/network connectivity checks; `authentication` points to the database user/URI credentials; `dns` points to hostname/discovery access; `configuration` points to missing runtime values. TLS verification remains enabled.
+
 ## 4. Verify the live service
 
 1. Confirm the build succeeds and the host reports `/api/health` healthy.

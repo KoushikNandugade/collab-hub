@@ -6,7 +6,7 @@ Verified locally on 28 October 2026. The existing public URL remains **https://c
 
 | Check                                                  | Result                                                                                        |
 | ------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| `npm test`                                             | 18 passed, 0 failed, 0 skipped                                                                |
+| `npm test`                                             | 22 passed, 0 failed, 0 skipped                                                                |
 | `npm run build`                                        | Passed; client pages split into separate bundles                                              |
 | Browser suite against Vite + Express                   | 4 passed                                                                                      |
 | Same browser suite against the Vercel function harness | 4 passed                                                                                      |
@@ -45,3 +45,7 @@ After the existing Vercel project deploys this commit, verify:
 6. Confirm persisted messages and, when Render is configured, live delivery and typing indicators.
 
 Use the existing Vercel project and domain. No new frontend project or domain is required. See [deployment instructions](deployment.md).
+
+## Startup failure diagnostics follow-up
+
+A supplied Render log showed a successful build followed by `MongooseServerSelectionError` at startup. Safe structured diagnostics were added to distinguish network/server selection, DNS, authentication, and missing configuration without logging connection strings or secrets. Four additional tests verify those categories and credential non-disclosure; the full API/integration suite now passes 22 tests. Atlas network access from the actual Render service remains a required external check.

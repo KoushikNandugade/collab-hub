@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { createServer } from "node:http";
 import { createApp } from "./app.js";
 import { connectDatabase } from "./services/database.js";
+import { startupDiagnostic } from "./utils/startup-diagnostic.js";
 const uri = process.env.MONGODB_URI;
 if (!uri || !process.env.JWT_SECRET) {
   console.error("Set MONGODB_URI and JWT_SECRET. See .env.example.");
@@ -36,11 +37,6 @@ try {
       setTimeout(() => process.exit(1), 10000).unref();
     });
 } catch (error) {
-  console.error(
-    "Startup failed:",
-    error.name,
-    error.code || "",
-    "Check environment settings and MongoDB connectivity.",
-  );
+  console.error(JSON.stringify(startupDiagnostic(error)));
   process.exit(1);
 }

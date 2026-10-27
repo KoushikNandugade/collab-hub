@@ -1,5 +1,6 @@
 // Vercel Node Function: reuse the database connection and Express app on warm requests.
 let application;
+let lastStartupLog = 0;
 module.exports = async function handler(req, res) {
   try {
     const { connectDatabase } =
@@ -29,7 +30,13 @@ module.exports = async function handler(req, res) {
     }
     const app = await application;
     return app(req, res);
-  } catch {
+  } catch (error) {
+    if (Date.now() - lastStartupLog >= 60000) {
+      lastStartupLog = Date.now();
+      const { startupDiagnostic } =
+        await import("../server/src/utils/startup-diagnostic.js");
+      console.error(JSON.stringify(startupDiagnostic(error)));
+    }
     res.statusCode = 503;
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Cache-Control", "no-store");
