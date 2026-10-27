@@ -6,13 +6,13 @@ Project URL: [collab-hub-phi.vercel.app](https://collab-hub-phi.vercel.app) · R
 
 A full-stack collaboration platform for students, developers, designers, and makers. Discover projects, apply for a role, recruit a team, and build together in a private workspace.
 
-## Start the Render backend without an API key
+## Deploy as a normal Render Web Service
 
-[Deploy the existing repository on Render](https://render.com/deploy?repo=https://github.com/KoushikNandugade/collab-hub)
+In the Render dashboard choose **New + → Web Service**, connect `KoushikNandugade/collab-hub`, select `main`, and choose the **Node** runtime. Leave Root Directory blank. Build with `npm ci --include=dev --no-audit --no-fund && npm run build` and start with `npm start`. Use the Free plan if available.
 
-Open that link in your logged-in Render account. The checked-in blueprint supplies the build/start commands, health check, free-plan selection, and existing Vercel origin. Enter only your private `MONGODB_URI` and the **same** `JWT_SECRET` already configured on Vercel. After the service is live, save its HTTPS URL as `REALTIME_URL` in the existing Vercel project and redeploy that project. Your frontend domain stays unchanged.
+Add `MONGODB_URI`, `JWT_SECRET`, `NODE_ENV=production`, and `CLIENT_ORIGIN=https://collab-hub-phi.vercel.app` in the service's Environment section. If no JWT secret has been created, generate a new random value and add the **same** value to both Render and Vercel. A JWT secret is created by you; it is not issued by MongoDB or Vercel.
 
-A Render API key is not an application setting and is not needed for this dashboard workflow.
+This uses a standard Web Service through the dashboard. No Blueprint or Render API key is needed. See [the exact setup steps](docs/deployment.md). Keep the existing Vercel project and URL.
 
 ## What you can do
 

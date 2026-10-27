@@ -27,17 +27,43 @@ A Vercel 404 means the function was not routed or the expected deployment is not
 
 In the existing Vercel project, check **Settings → Build and Deployment → Root Directory**. Use the repository root (blank or `./`), save, and redeploy the latest `main` commit. The root `vercel.json` supplies the frontend output directory and `/api/*` rewrite. Confirm that the deployment is Ready and that `/api/health` returns JSON. A JSON 503 after that is a separate runtime/configuration failure and should be investigated using the function logs and Atlas connectivity.
 
-## API-key-free Render dashboard launch
+## Standard Render Web Service setup
 
-[Create the backend from this repository's blueprint](https://render.com/deploy?repo=https://github.com/KoushikNandugade/collab-hub).
+Use **New + → Web Service** in your logged-in Render dashboard. Connect the existing GitHub repository; do not select Blueprint deployment.
 
-This uses your logged-in Render dashboard. No Render API key is needed. Keep the existing Vercel project. Render will ask for the private `MONGODB_URI` and shared `JWT_SECRET`; all other required service settings and the Vercel origin are in `render.yaml`. Never put credentials in the deploy URL or commit them to the repository.
+| Setting            | Value                                                        |
+| ------------------ | ------------------------------------------------------------ |
+| Repository         | `KoushikNandugade/collab-hub`                                |
+| Branch             | `main`                                                       |
+| Language / runtime | Node                                                         |
+| Root Directory     | Leave blank (repository root)                                |
+| Build Command      | `npm ci --include=dev --no-audit --no-fund && npm run build` |
+| Start Command      | `npm start`                                                  |
+| Plan               | Free, if available                                           |
+| Health Check Path  | `/api/health`                                                |
 
-After Render reports Live, test its own service URL with `/api/health`, then connect that URL to Vercel using `REALTIME_URL` as described below. Do not guess a Render hostname before the service exists.
+In Environment, add:
+
+| Name            | Value                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------------- |
+| `MONGODB_URI`   | Your private Atlas connection string                                                      |
+| `JWT_SECRET`    | A newly generated random secret, or the existing shared secret if you already created one |
+| `NODE_ENV`      | `production`                                                                              |
+| `CLIENT_ORIGIN` | `https://collab-hub-phi.vercel.app`                                                       |
+
+If `JWT_SECRET` is not in Vercel, create one instead of searching for an automatically supplied value. In Render, add the variable and use its Generate option. Alternatively, generate a value in your own terminal:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
+
+Keep that generated value private. Add the exact same value as a **new** `JWT_SECRET` variable in the existing Vercel project's Environment Variables settings, selecting the Production environment. Redeploy Vercel after saving it. Do not commit the value, put it in a URL, or share it in chat.
+
+Click **Deploy Web Service** in Render. When it reports Live, test its own service URL with `/api/health`, then add that actual HTTPS Render URL as `REALTIME_URL` on Vercel and redeploy the existing Vercel project. Your frontend domain stays unchanged. No account API key is required for these dashboard actions.
 
 ## Connect live Socket.IO delivery without changing the Vercel link
 
-1. Create the Render service from the checked-in `render.yaml` in the same repository. Use the **same** `MONGODB_URI` and `JWT_SECRET` values as Vercel. `CLIENT_ORIGIN` is already set to the existing Vercel domain in that blueprint.
+1. Create a normal Render Web Service using the settings above. Use the **same** `MONGODB_URI` and `JWT_SECRET` values as Vercel, and set `CLIENT_ORIGIN` to the existing Vercel domain.
 2. Wait for the Render `/api/health` endpoint to report healthy.
 3. In the existing Vercel project, add `REALTIME_URL` with the actual HTTPS Render service URL, without a trailing slash. Redeploy that Vercel project.
 4. Check that the conversation status changes from periodic refresh to **Live conversation**, two users receive messages immediately, and typing indicators work.
@@ -75,7 +101,7 @@ Store the URI in the hosting environment as `MONGODB_URI`. Atlas is a replica se
 
 ## 2. Create the Render service
 
-Connect this GitHub repository to Render. You can create a Blueprint from `render.yaml`, or a Node web service with:
+Connect this GitHub repository through **New + → Web Service**, choose the Node runtime, and use:
 
 - Branch: `main`
 - Root directory: repository root
@@ -84,7 +110,7 @@ Connect this GitHub repository to Render. You can create a Blueprint from `rende
 - Health check: `/api/health`
 - Node.js: 22 or newer
 
-The blueprint uses the free plan; confirm current availability and limits in Render. Sleeping free instances can take time to wake and interrupt live connections. Select a plan appropriate for a continuously available service.
+Choose the Free plan if available; confirm its current availability and limits in Render. Sleeping free instances can take time to wake and interrupt live connections. Select a plan appropriate for a continuously available service.
 
 ## 3. Set environment variables
 
