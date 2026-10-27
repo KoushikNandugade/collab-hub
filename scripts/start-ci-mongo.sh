@@ -6,16 +6,30 @@ mongo_container="${CI_MONGO_CONTAINER:-collabhub-ci-mongo}"
 mongo_port="${CI_MONGO_PORT:-27017}"
 mongo_image="mongo@sha256:8e7d23aa641b0ec6c86418866d5d18d74d5abf89061bc5db7bc4b80929021ef6"
 
+startup_log="/tmp/collabhub-ci-mongo-startup.log"
+
 report_failure() {
   echo '::error::The CI MongoDB replica set did not become ready.'
   docker inspect --format '{{json .State}}' "$mongo_container" || true
   docker logs --tail 100 "$mongo_container" || true
+  # Only this fresh local test container is included; no application environment.
+  diagnostic="$(
+    tail -n 8 "$startup_log" 2>/dev/null || true
+    docker inspect --format '{{json .State}}' "$mongo_container" 2>&1 || true
+    docker logs --tail 8 "$mongo_container" 2>&1 || true
+  )"
+  diagnostic="${diagnostic:0:6000}"
+  diagnostic="${diagnostic//'%'/'%25'}"
+  diagnostic="${diagnostic//$'\r'/'%0D'}"
+  diagnostic="${diagnostic//$'\n'/'%0A'}"
+  printf '::error title=MongoDB CI startup diagnostics::%s\n' "$diagnostic"
 }
 trap report_failure ERR
 
 docker run -d --name "$mongo_container" \
   -p "127.0.0.1:${mongo_port}:27017" \
-  "$mongo_image" --replSet rs0 --bind_ip_all
+  "$mongo_image" --replSet rs0 --bind_ip_all > "$startup_log" 2>&1
+cat "$startup_log"
 
 # Wait for the final replica-set process, not only a successful TCP connection.
 ready=false
