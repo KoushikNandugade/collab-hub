@@ -30,7 +30,7 @@ jobs:
             if curl -fsS http://localhost:5173/ > /dev/null && curl -fsS http://localhost:3001/api/health > /dev/null; then break; fi
             sleep 1
           done
-          npm run test:e2e
+          npm run test:e2e -- --reporter=list,github
       - name: Browser tests through the Vercel function
         run: |
           PORT=3004 CLIENT_ORIGIN=http://localhost:3004 npm run dev:vercel > /tmp/collabhub-vercel.log 2>&1 &
@@ -38,7 +38,7 @@ jobs:
             if curl -fsS http://localhost:3004/api/health > /dev/null; then break; fi
             sleep 1
           done
-          E2E_BASE_URL=http://localhost:3004 npm run test:e2e
+          E2E_BASE_URL=http://localhost:3004 npm run test:e2e -- --reporter=list,github
       - name: Collect failure diagnostics
         if: failure()
         run: |
