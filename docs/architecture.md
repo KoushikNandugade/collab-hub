@@ -1,6 +1,6 @@
 # Architecture
 
-The Vite client calls same-origin `/api` REST endpoints. Development proxies the API and Socket.IO through Vite. In deployment, Express serves `client/dist` alongside the API and Socket.IO so authentication cookies stay same-origin.
+The Vite client calls same-origin `/api` REST endpoints. Development proxies the API and Socket.IO through Vite. On Vercel, static hosting serves `client/dist` while the Node function runs the same Express API; Render provides the persistent Socket.IO service. In standalone hosting, Express can serve the built client, API, and sockets together. REST authentication cookies remain same-origin in both configurations.
 
 ## MongoDB schemas
 
@@ -27,6 +27,7 @@ Success responses contain named resources (`user`, `project`, `task`, `items`, e
 
 | Method        | Path                                                     | Purpose / authorization                                                                  |
 | ------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| GET           | `/api/realtime`                                          | Authenticated socket connection mode and optional short-lived access token               |
 | GET           | `/api/health`                                            | Database readiness                                                                       |
 | POST          | `/api/auth/register`, `/api/auth/login`                  | Rate-limited account/session creation                                                    |
 | GET           | `/api/auth/me`                                           | Current authenticated user                                                               |

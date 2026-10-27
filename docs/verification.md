@@ -29,13 +29,13 @@ The browser suites exercise registration, onboarding, project creation, task cha
 
 Requests from this cloud environment to the production Vercel domain were blocked by its egress proxy before reaching the application (`CONNECT 403`). Consequently, these results do **not** establish that the deployed Vercel build, its runtime variables, Atlas access, or its edge rewrites are healthy. The exact Vercel hostname has been added to the saved environment network draft; applying the draft is a separate user action.
 
-The user confirmed that Render has not been deployed. Persistent Socket.IO delivery on the Vercel frontend requires an existing Render service configured with the same MongoDB URI and JWT secret, its `CLIENT_ORIGIN` set to the unchanged Vercel URL, and its actual HTTPS URL saved as `REALTIME_URL` on Vercel. Until then, persisted messaging uses five-second refresh rather than live sockets.
+The supplied Render dashboard shows the standard Web Service at **https://collab-hub-d51v.onrender.com** as Live on commit `432b252`. The supplied Vercel build log confirms deployment completed for the same commit. Subsequent Vercel runtime logs report `startup_failed` with `category: configuration`, indicating a missing `MONGODB_URI` or missing/short `JWT_SECRET`. Correct the Production variables and redeploy before claiming the live API is healthy. Linked Socket.IO delivery still requires matching database/signing values on both hosts and a successful two-browser check. Render Live status is not a substitute for that browser verification.
 
 Cloudinary upload calls remain unverified without that account's credentials. The URI-based image fields work independently.
 
 ## Required production checks
 
-After the existing Vercel project deploys this commit, verify:
+After correcting the Vercel runtime environment and redeploying, verify:
 
 1. `/api/health` returns JSON with `status: "ok"`.
 2. `/api/projects` returns JSON containing an `items` array.
@@ -48,4 +48,4 @@ Use the existing Vercel project and domain. No new frontend project or domain is
 
 ## Startup failure diagnostics follow-up
 
-A supplied Render log showed a successful build followed by `MongooseServerSelectionError` at startup. Safe structured diagnostics were added to distinguish network/server selection, DNS, authentication, and missing configuration without logging connection strings or secrets. Four additional tests verify those categories and credential non-disclosure; the full API/integration suite now passes 22 tests. Atlas network access from the actual Render service remains a required external check.
+A supplied Render log showed a successful build followed by `MongooseServerSelectionError` at startup. Safe structured diagnostics were added to distinguish network/server selection, DNS, authentication, and missing configuration without logging connection strings or secrets. Four additional tests verify those categories and credential non-disclosure; the full API/integration suite now passes 22 tests. The later supplied dashboard shows Render Live; direct production health and cross-host messaging checks remain unverified from this environment.
