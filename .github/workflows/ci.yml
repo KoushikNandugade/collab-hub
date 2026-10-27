@@ -24,21 +24,9 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run seed
       - name: Browser smoke tests
-        run: |
-          npm run dev > /tmp/collabhub-dev.log 2>&1 &
-          for attempt in $(seq 1 30); do
-            if curl -fsS http://localhost:5173/ > /dev/null && curl -fsS http://localhost:3001/api/health > /dev/null; then break; fi
-            sleep 1
-          done
-          npm run test:e2e -- --reporter=list,github
+        run: E2E_START_SERVER=dev npm run test:e2e -- --reporter=list,github
       - name: Browser tests through the Vercel function
-        run: |
-          PORT=3004 CLIENT_ORIGIN=http://localhost:3004 npm run dev:vercel > /tmp/collabhub-vercel.log 2>&1 &
-          for attempt in $(seq 1 30); do
-            if curl -fsS http://localhost:3004/api/health > /dev/null; then break; fi
-            sleep 1
-          done
-          E2E_BASE_URL=http://localhost:3004 npm run test:e2e -- --reporter=list,github
+        run: E2E_START_SERVER=vercel E2E_BASE_URL=http://localhost:3004 npm run test:e2e -- --reporter=list,github
       - name: Collect failure diagnostics
         if: failure()
         run: |
