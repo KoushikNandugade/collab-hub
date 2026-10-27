@@ -8,6 +8,13 @@ const baseURL =
   process.env.E2E_BASE_URL ||
   (serverMode === "vercel" ? "http://localhost:3004" : "http://localhost:5173");
 
+const serverCommand =
+  serverMode === "vercel" ? "npm run dev:vercel" : "npm run dev";
+const serverLog =
+  serverMode === "vercel"
+    ? "/tmp/collabhub-vercel.log"
+    : "/tmp/collabhub-dev.log";
+
 export default defineConfig({
   testDir: "./e2e",
   timeout: 45000,
@@ -23,7 +30,9 @@ export default defineConfig({
   },
   webServer: serverMode
     ? {
-        command: serverMode === "vercel" ? "npm run dev:vercel" : "npm run dev",
+        command: process.env.CI
+          ? `${serverCommand} > ${serverLog} 2>&1`
+          : serverCommand,
         url: new URL("/api/health", baseURL).href,
         timeout: 60000,
         reuseExistingServer: false,

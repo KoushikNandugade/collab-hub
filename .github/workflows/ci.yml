@@ -36,6 +36,15 @@ jobs:
           for log in /tmp/collabhub-dev.log /tmp/collabhub-vercel.log; do
             if [ -f "$log" ]; then cp "$log" ci-diagnostics/; fi
           done
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ["/tmp/collabhub-dev.log", "/tmp/collabhub-vercel.log"]:
+              path = Path(name)
+              if path.exists():
+                  text = path.read_text(errors="replace")[-8000:]
+                  text = text.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+                  print(f"::error title=Test server log ({path.name})::{text}")
+          PY
       - uses: actions/upload-artifact@v6
         if: failure()
         with:
