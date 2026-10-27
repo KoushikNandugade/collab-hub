@@ -1,33 +1,24 @@
 name: Verify CollabHub
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       MONGODB_URI: mongodb://127.0.0.1:27017/collabhub_e2e?replicaSet=rs0&directConnection=true
       JWT_SECRET: ci-only-secret-with-more-than-thirty-two-characters
       CLIENT_ORIGIN: http://localhost:5173
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
       - run: npm ci --no-audit --no-fund
       - name: Start transactional MongoDB
-        run: |
-          docker run -d --name mongo -p 127.0.0.1:27017:27017 mongo:8.0 --replSet rs0 --bind_ip_all
-          for attempt in $(seq 1 30); do
-            if docker exec mongo mongosh --quiet --eval 'db.adminCommand("ping").ok'; then break; fi
-            sleep 1
-          done
-          docker exec mongo mongosh --quiet --eval 'rs.initiate({_id:"rs0",members:[{_id:0,host:"127.0.0.1:27017"}]})'
-          for attempt in $(seq 1 30); do
-            if docker exec mongo mongosh --quiet --eval 'if (!db.hello().isWritablePrimary) quit(1)'; then exit 0; fi
-            sleep 1
-          done
-          exit 1
+        run: bash scripts/start-ci-mongo.sh
       - run: npm test
       - run: npm run build
       - run: npx playwright install --with-deps chromium
@@ -48,8 +39,19 @@ jobs:
             sleep 1
           done
           E2E_BASE_URL=http://localhost:3004 npm run test:e2e
-      - uses: actions/upload-artifact@v4
+      - name: Collect failure diagnostics
+        if: failure()
+        run: |
+          mkdir -p ci-diagnostics
+          docker inspect --format '{{json .State}}' collabhub-ci-mongo > ci-diagnostics/mongo-state.json 2>&1 || true
+          docker logs --tail 200 collabhub-ci-mongo > ci-diagnostics/mongo.log 2>&1 || true
+          for log in /tmp/collabhub-dev.log /tmp/collabhub-vercel.log; do
+            if [ -f "$log" ]; then cp "$log" ci-diagnostics/; fi
+          done
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
-          name: browser-test-results
-          path: test-results/
+          name: ci-failure-diagnostics
+          path: |
+            test-results/
+            ci-diagnostics/

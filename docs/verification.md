@@ -49,3 +49,7 @@ Use the existing Vercel project and domain. No new frontend project or domain is
 ## Startup failure diagnostics follow-up
 
 A supplied Render log showed a successful build followed by `MongooseServerSelectionError` at startup. Safe structured diagnostics were added to distinguish network/server selection, DNS, authentication, and missing configuration without logging connection strings or secrets. Four additional tests verify those categories and credential non-disclosure; the full API/integration suite now passes 22 tests. The later supplied dashboard shows Render Live; direct production health and cross-host messaging checks remain unverified from this environment.
+
+## GitHub Actions runner follow-up
+
+The public Actions page for run `40585120206` identifies **Start transactional MongoDB** as the failing step, before application tests. Its detailed logs require authenticated access. The original startup sequence succeeded against a fresh local container, so the exact remote cause was not established by that reproduction. CI now uses Ubuntu 24.04 and an immutable MongoDB image, waits explicitly for the replica-set process and primary, and collects container state, MongoDB logs, and available app logs on failure. Action versions use Node.js 24-compatible releases. These changes require a new GitHub Actions run to verify the hosted runner.
