@@ -1,0 +1,45 @@
+services:
+  mongo:
+    image: mongo:8.0
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test:
+        ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+  mongo-init:
+    image: mongo:8.0
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: "no"
+    entrypoint:
+      [
+        "mongosh",
+        "--host",
+        "mongo:27017",
+        "--quiet",
+        "--eval",
+        "try { rs.status() } catch(e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo:27017'}]}) }",
+      ]
+  app:
+    profiles: ["app"]
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/collabhub?replicaSet=rs0&directConnection=true
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env first}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:3001}
+      PORT: 3001
+      NODE_ENV: production
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+volumes:
+  mongo-data:
