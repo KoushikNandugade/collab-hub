@@ -7,7 +7,7 @@ A MERN collaboration platform where students, developers, designers, and makers 
 [![Verify CollabHub](https://github.com/KoushikNandugade/collab-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/KoushikNandugade/collab-hub/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-[Open CollabHub](https://collab-hub-phi.vercel.app) · [Setup and deployment](docs/deployment.md) · [Architecture and API](docs/architecture.md) · [Demo checklist](docs/demo.md)
+[Open CollabHub](https://collab-hub-phi.vercel.app) · [Watch the demo](https://collab-hub-phi.vercel.app/demo/index.html) · [Setup and deployment](docs/deployment.md) · [Architecture and API](docs/architecture.md) · [Demo checklist](docs/demo.md)
 
 ## Problem statement
 

@@ -1,0 +1,35 @@
+The idea behind CollabHub
+Great ideas need the right people. Collab Hub helps students, developers, designers, and makers find collaborators and build together. Instead of spreading recruitment, tasks, and conversations across different tools, the platform brings them into one connected workflow. This walkthrough uses the working local application and isolated demonstration data. The public application link appears at the end.
+
+Create an account and build a profile
+We begin as Koushik, a project owner. He creates an account and completes a short onboarding form. Skills, interests, experience, and availability help the platform connect people with suitable projects. Profiles also provide space for a college, a biography, goals, and portfolio links. Sessions keep account-specific information behind authenticated access.
+
+A personal dashboard and explained matches
+The dashboard becomes the starting point for projects, applications, invitations, and recent activity. Recommendations use transparent matching rules to compare skills, interests, availability, experience, and collaboration preferences. Matching reasons help people understand each suggestion. New accounts begin with genuine empty states and database-backed community content.
+
+Publish a project with clear recruiting roles
+Koushik starts CampusConnect, a campus community project that needs a frontend developer and a designer. He describes the idea, chooses its category and experience level, and sets the expected duration and team size. Each recruiting role has its own required skills and number of openings. After publishing, the project becomes discoverable and gets a private owner workspace.
+
+Discover, save, and apply as a collaborator
+We now switch to Maya, a collaborator looking for a React project. She searches the project directory and opens CampusConnect. The detail page explains the goal, team, required skills, and available roles. She saves the project and applies for the frontend opening. Her introduction and motivation become a real application, with its status visible in her account.
+
+Review applications and admit a teammate
+Back in the owner's workspace, Koushik can review Maya's application and accept or reject it. Acceptance updates the role opening and team membership together in a database transaction. This protects team capacity when requests happen at the same time. Maya now appears on the team and gains access to the project's private workspace.
+
+Assign work and verify persistent progress
+Inside the workspace, the team can create tasks with an assignee, priority, due date, and status. Koushik assigns the first frontend task to Maya. The Kanban board organizes work into To do, In progress, Review, and Completed. Moving the task to Review changes its stored state. Reloading the page confirms that the progress survives beyond the current browser view.
+
+Keep resources and project history together
+The Resources tab keeps useful links in the project instead of losing them in a chat thread. Koushik adds the repository link, while the activity history records important project and task changes. These shared workspace sections remain available to authorized members of the team.
+
+Discuss the project in real time
+The project discussion connects the team directly inside its workspace. Messages are saved, and Socket I O provides live delivery and typing indicators. Koushik welcomes Maya. From her separate account, Maya types and replies, and her response arrives in the owner's conversation. The conversation stays attached to the project, alongside the work it supports.
+
+Find people, invite talent, and message directly
+Collaboration can also begin with a person. The people directory and public profiles show skills, interests, and previous project work. An owner can invite a suitable collaborator to an open project role. Here, Koushik sends a designer an invitation. He can also start a private direct conversation with Maya. Her reply arrives live, independently of the team discussion.
+
+Stay informed and return to saved projects
+Maya's notifications bring together application decisions, invitations, messages, and task assignments. She can mark them as read and return to projects she saved earlier. Her dashboard now reflects real collaboration activity, rather than a fixed collection of sample cards.
+
+Log out safely and visit the live application
+Finally, Maya logs out. Protected pages return her to sign-in, while project data and message history remain stored. Collab Hub combines a React interface, an Express API, Mongo D B persistence, and Socket I O communication. From finding a project to recruiting a team and doing the work, the core workflows connect end to end.

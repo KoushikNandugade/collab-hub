@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Watch CollabHub's complete application walkthrough: profiles, recruiting, tasks, and real-time collaboration." />
+    <title>CollabHub — Application demo</title>
+    <style>
+      :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #10111b; color: #f3f1fa; }
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 40px 20px; }
+      main { max-width: 1120px; margin: auto; }
+      h1 { font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 12px; }
+      p { color: #c4bfd3; line-height: 1.6; }
+      video { width: 100%; display: block; margin-top: 24px; border-radius: 14px; background: #000; }
+      nav { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0; }
+      a { color: #c9b6ff; }
+      nav a { padding: 12px 18px; border: 1px solid #67528d; border-radius: 8px; text-decoration: none; }
+      nav a:first-child { background: #7752cc; color: white; }
+      a:focus-visible { outline: 3px solid #e1d3ff; outline-offset: 4px; }
+      small { display: block; color: #aaa4b9; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>CollabHub in action</h1>
+      <p>A 4-minute 56-second walkthrough: create a profile, publish a project, recruit a teammate, assign tasks, and collaborate through messages.</p>
+      <video controls playsinline preload="metadata" aria-label="CollabHub complete application walkthrough">
+        <source src="./CollabHub-Demo.mp4" type="video/mp4" />
+        <track kind="captions" src="./CollabHub-Demo.vtt" srclang="en" label="English" />
+        Your browser cannot play this video. <a href="./CollabHub-Demo.mp4" download>Download the MP4 instead.</a>
+      </video>
+      <nav aria-label="Demo links">
+        <a href="./CollabHub-Demo.mp4" download>Download video (12 MB)</a>
+        <a href="./CollabHub-Demo.srt" download>Download subtitles</a>
+        <a href="./Chapters.txt">Chapter timestamps</a>
+        <a href="./Narration.txt">Read the transcript</a>
+        <a href="/">Open CollabHub</a>
+      </nav>
+      <small>Actual working local application recording with isolated demonstration data. English narration is synthetic; captions are also included in the video. <a href="./README.txt">Recording details</a> · <a href="./Voice-Model-Card.txt">Voice model credits</a></small>
+    </main>
+  </body>
+</html>

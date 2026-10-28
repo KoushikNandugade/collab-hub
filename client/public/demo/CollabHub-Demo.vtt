@@ -1,0 +1,177 @@
+WEBVTT
+
+1
+00:00:00.600 --> 00:00:08.052
+Great ideas need the right people. CollabHub helps students, developers, designers, and
+makers find collaborators and build together.
+
+2
+00:00:08.282 --> 00:00:15.216
+Instead of spreading recruitment, tasks, and conversations across different tools, the
+platform brings them into one connected workflow.
+
+3
+00:00:15.446 --> 00:00:22.667
+This walkthrough uses the working local application and isolated demonstration data. The
+public application link appears at the end.
+
+4
+00:00:24.200 --> 00:00:29.733
+We begin as Koushik, a project owner. He creates an account and completes a short
+onboarding form.
+
+5
+00:00:29.963 --> 00:00:36.010
+Skills, interests, experience, and availability help the platform connect people with
+suitable projects.
+
+6
+00:00:36.240 --> 00:00:45.166
+Profiles also provide space for a college, a biography, goals, and portfolio links.
+Sessions keep account-specific information behind authenticated access.
+
+7
+00:00:52.200 --> 00:00:58.211
+The dashboard becomes the starting point for projects, applications, invitations, and
+recent activity.
+
+8
+00:00:58.441 --> 00:01:05.854
+Recommendations use transparent matching rules to compare skills, interests, availability,
+experience, and collaboration preferences.
+
+9
+00:01:06.084 --> 00:01:13.654
+Matching reasons help people understand each suggestion. New accounts begin with genuine
+empty states and database-backed community content.
+
+10
+00:01:15.200 --> 00:01:20.889
+Koushik starts CampusConnect, a campus community project that needs a frontend developer
+and a designer.
+
+11
+00:01:21.119 --> 00:01:27.301
+He describes the idea, chooses its category and experience level, and sets the expected
+duration and team size.
+
+12
+00:01:27.531 --> 00:01:35.894
+Each recruiting role has its own required skills and number of openings. After publishing,
+the project becomes discoverable and gets a private owner workspace.
+
+13
+00:01:45.200 --> 00:01:52.336
+We now switch to Maya, a collaborator looking for a React project. She searches the
+project directory and opens CampusConnect.
+
+14
+00:01:52.566 --> 00:02:00.579
+The detail page explains the goal, team, required skills, and available roles. She saves
+the project and applies for the frontend opening.
+
+15
+00:02:00.809 --> 00:02:05.530
+Her introduction and motivation become a real application, with its status visible in her
+account.
+
+16
+00:02:11.200 --> 00:02:16.031
+Back in the owner's workspace, Koushik can review Maya's application and accept or reject
+it.
+
+17
+00:02:16.261 --> 00:02:25.072
+Acceptance updates the role opening and team membership together in a database
+transaction. This protects team capacity when requests happen at the same time.
+
+18
+00:02:25.302 --> 00:02:29.888
+Maya now appears on the team and gains access to the project's private workspace.
+
+19
+00:02:33.200 --> 00:02:38.782
+Inside the workspace, the team can create tasks with an assignee, priority, due date, and
+status.
+
+20
+00:02:39.012 --> 00:02:46.593
+Koushik assigns the first frontend task to Maya. The Kanban board organizes work into To
+do, In progress, Review, and Completed.
+
+21
+00:02:46.823 --> 00:02:54.010
+Moving the task to Review changes its stored state. Reloading the page confirms that the
+progress survives beyond the current browser view.
+
+22
+00:02:59.200 --> 00:03:04.018
+The Resources tab keeps useful links in the project instead of losing them in a chat
+thread.
+
+23
+00:03:04.248 --> 00:03:10.086
+Koushik adds the repository link, while the activity history records important project and
+task changes.
+
+24
+00:03:10.316 --> 00:03:14.763
+These shared workspace sections remain available to authorized members of the team.
+
+25
+00:03:17.200 --> 00:03:25.817
+The project discussion connects the team directly inside its workspace. Messages are
+saved, and Socket.IO provides live delivery and typing indicators.
+
+26
+00:03:26.047 --> 00:03:32.971
+Koushik welcomes Maya. From her separate account, Maya types and replies, and her response
+arrives in the owner's conversation.
+
+27
+00:03:33.201 --> 00:03:37.108
+The conversation stays attached to the project, alongside the work it supports.
+
+28
+00:03:41.200 --> 00:03:49.189
+Collaboration can also begin with a person. The people directory and public profiles show
+skills, interests, and previous project work.
+
+29
+00:03:49.419 --> 00:03:55.742
+An owner can invite a suitable collaborator to an open project role. Here, Koushik sends a
+designer an invitation.
+
+30
+00:03:55.972 --> 00:04:02.671
+He can also start a private direct conversation with Maya. Her reply arrives live,
+independently of the team discussion.
+
+31
+00:04:10.200 --> 00:04:16.177
+Maya's notifications bring together application decisions, invitations, messages, and task
+assignments.
+
+32
+00:04:16.407 --> 00:04:20.075
+She can mark them as read and return to projects she saved earlier.
+
+33
+00:04:20.305 --> 00:04:25.873
+Her dashboard now reflects real collaboration activity, rather than a fixed collection of
+sample cards.
+
+34
+00:04:28.200 --> 00:04:35.417
+Finally, Maya logs out. Protected pages return her to sign-in, while project data and
+message history remain stored.
+
+35
+00:04:35.647 --> 00:04:42.037
+CollabHub combines a React interface, an Express API, MongoDB persistence, and Socket.IO
+communication.
+
+36
+00:04:42.267 --> 00:04:47.456
+From finding a project to recruiting a team and doing the work, the core workflows connect
+end to end.
