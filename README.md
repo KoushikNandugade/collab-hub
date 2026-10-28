@@ -9,6 +9,16 @@ A MERN collaboration platform where students, developers, designers, and makers 
 
 [Open CollabHub](https://collab-hub-phi.vercel.app) · [Watch the demo](https://collab-hub-phi.vercel.app/demo/index.html) · [Setup and deployment](docs/deployment.md) · [Architecture and API](docs/architecture.md) · [Demo checklist](docs/demo.md)
 
+## Application demo video
+
+The complete **4-minute 56-second, 1080p walkthrough** is included in this repository at [`client/public/demo/CollabHub-Demo.mp4`](client/public/demo/CollabHub-Demo.mp4), with English narration and captions.
+
+- [Download the MP4](https://github.com/KoushikNandugade/collab-hub/raw/refs/heads/main/client/public/demo/CollabHub-Demo.mp4)
+- [Watch in the browser](https://collab-hub-phi.vercel.app/demo/index.html)
+- [Chapter timestamps](client/public/demo/Chapters.txt) · [Transcript](client/public/demo/Narration.txt) · [Subtitles](client/public/demo/CollabHub-Demo.srt)
+
+The walkthrough covers signup, onboarding, project discovery and creation, applications, team recruitment, tasks, resources, messaging, notifications, and logout. It records the working local application with isolated demonstration data and synthetic English narration. [Recording details and voice credits](client/public/demo/README.txt).
+
 ## Problem statement
 
 Students and independent makers often have project ideas but struggle to find collaborators with the right skills, interests, and availability. Recruitment happens in disconnected chats, while applications, team capacity, tasks, resources, and discussions become difficult to track.
