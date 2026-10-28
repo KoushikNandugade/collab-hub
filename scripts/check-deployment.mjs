@@ -79,6 +79,44 @@ const checks = [
     },
   })),
   {
+    name: "Public demo player",
+    url: `${app}/demo/index.html`,
+    verify: async (response) => {
+      requireCondition(
+        response.status === 200,
+        "Expected HTTP 200.",
+        response.status,
+      );
+      const body = await response.text();
+      requireCondition(
+        response.headers.get("content-type")?.includes("text/html") &&
+          body.includes("CollabHub-Demo.mp4") &&
+          body.includes("<video"),
+        "Expected the demo video player page.",
+        response.status,
+      );
+    },
+  },
+  {
+    name: "Public demo video download",
+    url: `${app}/demo/CollabHub-Demo.mp4`,
+    headers: { Range: "bytes=0-63" },
+    verify: async (response) => {
+      requireCondition(
+        response.status === 200 || response.status === 206,
+        "Expected a downloadable video response.",
+        response.status,
+      );
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      requireCondition(
+        response.headers.get("content-type")?.includes("video/mp4") &&
+          new TextDecoder().decode(bytes.slice(4, 8)) === "ftyp",
+        "Expected MP4 data rather than the application HTML.",
+        response.status,
+      );
+    },
+  },
+  {
     name: "Public project discovery",
     url: `${app}/api/projects?limit=1`,
     verify: async (response) => {
