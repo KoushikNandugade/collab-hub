@@ -2,6 +2,13 @@
 
 Recorded on **28 October 2026 IST** for **CollabHub**. Public application: **https://collab-hub-phi.vercel.app**. Repository: **KoushikNandugade/collab-hub**.
 
+## Latest readiness check — 29 October 2026 IST
+
+- [Public deployment run 40776717573](https://github.com/KoushikNandugade/collab-hub/actions/runs/40776717573) passed at `a5b13d8`: application page, Vercel/Render API and database health, public discovery, signed-out protection, Render transport/CORS, demo player, and MP4 download.
+- [Fresh CI run 40776717629](https://github.com/KoushikNandugade/collab-hub/actions/runs/40776717629) passed at `a5b13d8`: server/API tests, frontend build, four browser scenarios on Vite/Express, and the same four through the Vercel function. [Live acceptance run 40768408566](https://github.com/KoushikNandugade/collab-hub/actions/runs/40768408566) executed successfully after the demo assets were added at `24f4abe`; it produced the live-workflow report.
+- A 1080p, 4-minute 56-second narrated demo is included under `client/public/demo/`. It records the working local application with isolated demo data; public playback/download is separately verified above.
+- Commit `853c115` subsequently exposed an Atlas connection string and JWT secret in `.env.example`. The latest file was sanitized in `a5b13d8`; the exposed values remain in historical commits. Earlier clean-history statements below describe their original check time and no longer describe the entire current history. Rotation of the database/JWT credentials and revocation of the previously shared Render API key are still unconfirmed. No hosting secret values or account management settings were inspected.
+
 ## Confirmed GitHub Actions result
 
 [Run 40604079512](https://github.com/KoushikNandugade/collab-hub/actions/runs/40604079512) completed successfully at commit `024220a`.
@@ -86,7 +93,7 @@ Direct requests from this workspace to the production services are blocked by it
 
 No Vercel, Render, or Atlas management credential is currently available to this workspace. Credential rotation and hosting environment changes cannot be claimed complete without account access or explicit confirmation of the changes. Cloudinary upload calls remain unverified without its optional account configuration.
 
-The user reports the demo video and submission form are complete. They were not edited or independently inspected by this task. See [submission-readiness.md](submission-readiness.md).
+The demo video is now bundled and its public download is verified as recorded above. The submission form remains user-confirmed; its entries and timing are not independently verified. See [submission-readiness.md](submission-readiness.md).
 
 ## Live acceptance finding and correction
 
